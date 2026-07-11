@@ -37,19 +37,29 @@
 ## HyperFrames Skills
 
 - 上游仓库：<https://github.com/heygen-com/hyperframes>
-- 固定版本：`v0.6.42`
-- 固定提交：[`d2b915be9ea1cb0787629c44bb33c0de8e408722`](https://github.com/heygen-com/hyperframes/tree/d2b915be9ea1cb0787629c44bb33c0de8e408722)
+- 固定版本：`v0.7.52`
+- 固定提交：[`7498eb4a3a601cff681ca7bc316b696c8de63539`](https://github.com/heygen-com/hyperframes/tree/7498eb4a3a601cff681ca7bc316b696c8de63539)
 - 许可证：[Apache License 2.0](./licenses/hyperframes-LICENSE.txt)
 - 致谢：[上游 CREDITS](./licenses/hyperframes-CREDITS.md)
-- 收录数量：14
+- 收录数量：9（原样收录 5，改编 4）
 
-收录目录：`animejs`、`contribute-catalog`、`css-animations`、`gsap`、`hyperframes`、`hyperframes-cli`、`hyperframes-media`、`hyperframes-registry`、`lottie`、`remotion-to-hyperframes`、`tailwind`、`three`、`typegpu`、`waapi`。
+收录目录：`hyperframes`、`hyperframes-animation`、`hyperframes-cli`、`hyperframes-core`、`hyperframes-creative`、`hyperframes-keyframes`、`hyperframes-registry`、`media-use`、`remotion-to-hyperframes`。其中 `hyperframes-animation`、`hyperframes-creative`、`media-use` 和 `remotion-to-hyperframes` 为改编，其余目录与固定提交一致。
 
 `licenses/hyperframes-CREDITS.md` 保留上游内容，只将其中指向根 `LICENSE` 的相对链接改为本仓库的 `hyperframes-LICENSE.txt`，避免复制后的文档链接失效。
 
-已知上游可移植性限制：`hyperframes/references/dynamic-techniques.md` 引用了不存在的 `skills/gsap-effects/scripts/extract-audio-data.py`；本快照中的实际脚本路径是 `gsap/scripts/extract-audio-data.py`。仓库保持第三方 Skill 原样，使用该命令时应改用实际路径。
+本次升级按上游官方 core 定义迁移：原 Anime.js、CSS、GSAP、Lottie、Three.js、TypeGPU 和 WAAPI 适配内容已合并到 `hyperframes-animation`，Tailwind 指南已合并到 `hyperframes-core`，catalog 贡献流程已合并到 `hyperframes-registry`，原 `hyperframes-media` 能力由 `media-use` 继承。原已收录的 `remotion-to-hyperframes` 同步升级。
 
-这些目录与固定提交一致。本机当前还启用了同一提交中的 `website-to-hyperframes`，但该目录包含 19 个 Pixabay 原始 MP3；现有 `CREDITS.md` 没有逐文件作品、作者和来源 URL，且 Pixabay Content License 限制 standalone 原样分发，因此本仓库暂不收录该 Skill。
+`hyperframes-animation` 基于 `v0.7.52` 改编：只修正 9 份 rule/blueprint 文档中 45 处错误的文件路径，使示例、转场、adapter 和根 `techniques.md` 引用指向现有文件；没有改写上游动画方法内容。
+
+`hyperframes-creative` 基于 `v0.7.52` 改编：只修正 `references/house-style.md` 中 13 处失效的相对链接，使其正确指向同目录的排版和动效资料，以及上一级 `palettes/` 中的配色文件；没有改写上游方法内容。
+
+`media-use` 基于 `v0.7.52` 改编：删除 `audio/assets/sfx/` 中 19 个 Pixabay MP3 及其 manifest，因为上游 `CREDITS.md` 没有提供逐文件作品、作者和来源 URL，且 Pixabay Content License 限制 standalone 原样分发；同时修正 2 处指向根 `SKILL.md` 的相对路径，并修正文档、运行提示和测试，使没有 HeyGen 凭据或用户自备本地素材时明确跳过 SFX，不产生指向缺失文件的记录。显式本地 SFX 库还会校验 manifest 根结构、数值类型和安全音频文件名，拒绝绝对路径、路径穿越、嵌套路径及 Windows 设备名。上游自动更新使用官方 manifest hash，运行 `npx hyperframes skills update` 会把本改编版识别为不同版本并恢复官方完整 `media-use`；该行为属于用户从上游直接更新，不代表本仓库重新分发这些音频。
+
+`remotion-to-hyperframes` 基于 `v0.7.52` 改编：修正 `SKILL.md`、eval 指南及 3 个测试 fixture README 中依赖错误当前目录或错误层级的命令，并为每组命令明确运行目录；没有改写迁移规则或评测阈值。
+
+为符合 Apache-2.0 第 4(b) 条，上述所有保留并修改的上游文件都在文件自身顶部携带显著修改声明；删除的音频及 manifest 则在本文件和 `media-use/audio/assets/sfx/CREDITS.md` 中记录。
+
+版本复核于 2026-07-11 完成：`v0.7.52` 是最新稳定版；默认分支 HEAD [`2aadf450e718497ac4b0edb7286cf4c8f3da06bc`](https://github.com/heygen-com/hyperframes/tree/2aadf450e718497ac4b0edb7286cf4c8f3da06bc) 比该 tag 多 6 个尚未发布的提交，涉及未收录 workflow、hooks、lint、telemetry 和 CLI，但逐 tree 对账确认没有改动本仓库选取的 9 个 Skill 目录，因此本仓库仍选择最新稳定 tag。上游 `website-to-video` 仍包含同一组 19 个缺少逐文件来源信息的 MP3，本仓库暂不收录。
 
 ## guizang-ppt-skill
 
@@ -59,7 +69,7 @@
 - 版权：Copyright (c) 2026 op7418 (歸藏)
 - 收录数量：1
 
-本机安装内容与该提交中的可分发 Skill 文件一致，没有复制上游仓库的 `.github/` 和根 `.gitignore`。上游在提交 [`014c572454065e905477a7432ae331dfc0fe6070`](https://github.com/op7418/guizang-ppt-skill/commit/014c572454065e905477a7432ae331dfc0fe6070) 后改为 AGPL-3.0；本仓库只收录更早、明确采用 MIT 的固定快照。
+本机安装内容与该提交中的可分发 Skill 文件一致，没有复制上游仓库的 `.github/` 和根 `.gitignore`。版本复核于 2026-07-11 完成：最新稳定 tag `v1.1.0`（`3652b3c`）比本快照更旧；最新默认分支 HEAD `82fe5ae129e8c2a12e1155fcabed6703342749d6` 只增加赞助信息，并在提交 [`014c572454065e905477a7432ae331dfc0fe6070`](https://github.com/op7418/guizang-ppt-skill/commit/014c572454065e905477a7432ae331dfc0fe6070) 后把许可证从 MIT 改为 AGPL-3.0，没有功能、模板、校验器或可移植性修复。为避免改变模板复制产物的许可义务，本仓库继续保留当前 MIT 快照，并记录为最新版例外。
 
 `guizang-ppt-skill/assets/motion.min.js` 是 jsDelivr 生成的 `motion@11.11.17` bundle。其上游为 [motiondivision/motion v11.11.17](https://github.com/motiondivision/motion/tree/ac650311b4ad8e65373ef96686d229cdf583bee1)，许可证为 [MIT](./licenses/motion-11.11.17-LICENSE.md)，版权为 Copyright (c) 2018 Framer B.V.
 
@@ -100,7 +110,7 @@
 
 - `punkzhou-video-writer`：只发现本机 `local:wenan` 安装记录，没有可核验的上游 URL 或许可证；在来源和授权确认前不收录。
 - `.cc-switch/skills/wenan`：是 `punkzhou-video-writer` 的旧别名副本，目录名与 frontmatter `name` 不一致，也没有作为独立 Skill 收录。
-- `website-to-hyperframes`：代码来源可以固定到 HyperFrames `v0.6.42`，但随附原始音频的再分发信息不完整，暂不收录。
+- `website-to-hyperframes`：本机旧版已由上游 `website-to-video` 取代；后者在 HyperFrames `v0.7.52` 中仍随附再分发信息不完整的 19 个原始音频，暂不收录。
 
 ## 未收录的宿主内容
 

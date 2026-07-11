@@ -2,7 +2,7 @@
 
 这是我的个人 Agent Skills 仓库，用于集中保存、整理和维护日常使用的 Skill。仓库同时包含自建 Skill 和经来源、版本、许可证核验后收录的第三方 Skill。
 
-当前快照日期为 **2026-07-11**，共收录 **55 个用户级 Skill**：
+当前快照日期为 **2026-07-11**，共收录 **50 个用户级 Skill**：
 
 | 分组 | 数量 | 类型 | 来源 | 许可证 |
 | --- | ---: | --- | --- | --- |
@@ -10,7 +10,7 @@
 | Layers of Product Design | 9 | 收录 | [jamiemill/layers-skills](https://github.com/jamiemill/layers-skills/tree/a201dc8c2011940b9d93934abb0f40c3b226c7ca) | [MIT](./licenses/layers-skills-LICENSE.txt) |
 | Owl Designer Skills | 14 | 收录 | [Owl-Listener/designer-skills](https://github.com/Owl-Listener/designer-skills/tree/acc3e574b36ef2895268a176dbae886e1b845ae0) | [MIT](./licenses/designer-skills-LICENSE.txt) |
 | better-web-ui | 10 | 收录 | [aladicf/better-web-ui](https://github.com/aladicf/better-web-ui/tree/af21dcfa71d83104a9e0beb04ffedf79f800f53c) | [自定义许可证](./licenses/better-web-ui-LICENSE.txt) |
-| HyperFrames Skills | 14 | 收录 | [heygen-com/hyperframes](https://github.com/heygen-com/hyperframes/tree/d2b915be9ea1cb0787629c44bb33c0de8e408722) | [Apache-2.0](./licenses/hyperframes-LICENSE.txt) |
+| HyperFrames Skills | 9 | 收录 5 / 改编 4 | [heygen-com/hyperframes v0.7.52](https://github.com/heygen-com/hyperframes/tree/7498eb4a3a601cff681ca7bc316b696c8de63539) | [Apache-2.0](./licenses/hyperframes-LICENSE.txt) |
 | guizang-ppt-skill | 1 | 收录 | [op7418/guizang-ppt-skill](https://github.com/op7418/guizang-ppt-skill/tree/6bfa520b86ed5a3dffdac0a3323155e2b6f516b6) | [MIT](./guizang-ppt-skill/LICENSE) |
 | Matt Pocock Skills | 3 | 收录 | [mattpocock/skills](https://github.com/mattpocock/skills/tree/391a2701dd948f94f56a39f7533f8eea9a859c87) | [MIT](./licenses/mattpocock-skills-LICENSE.txt) |
 | Obsidian Skills | 1 | 收录 | [kepano/obsidian-skills](https://github.com/kepano/obsidian-skills/tree/a1dc48e68138490d522c04cbf5822214c6eb1202) | [MIT](./licenses/obsidian-skills-LICENSE.txt) |
@@ -28,13 +28,18 @@
 
 Codex 的 `.system`、插件缓存和 `vendor_imports` 不属于可移植的用户级安装内容，因此没有复制。它们可能依赖宿主工具、插件命名空间和插件级共享资源，也可能受专有或禁止提取的许可证约束。详见下方“未收录内容”。
 
+## 版本维护
+
+入库的第三方 Skill 默认优先跟踪最新稳定 release/tag；没有有效稳定版本时才固定默认分支 HEAD。每次复核同时检查稳定版与 HEAD，并始终记录不可变 commit，不使用浮动的 `latest`。若最新版因许可证、资产授权、宿主依赖或兼容性不能安全收录，则保留最近可用版本，并在 [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md) 记录例外原因和复核日期。详细规则见 [AGENTS.md](./AGENTS.md)。
+
 ## 入口与依赖
 
 - [`evidence-first-product-design`](./evidence-first-product-design/) 是本仓库的主要**入口/编排 Skill**。它会根据任务选择少量相关 Skill，但不是使用其他 Skill 前必须调用的前置步骤。
 - [`layers-intro`](./layers-intro/) 是 Layers of Product Design 的**框架入口和真实前置依赖**；使用其他 `layers-*` Skill 前应先加载它。
 - `frontend-design` 会按需引用 `clarify`、`animate` 和 `optimize`，但并不要求每次前端任务都调用这三个 Skill。
 - `grill-me` 是 `grilling` 的兼容入口，实际执行依赖 `grilling`，安装时应成对保留。
-- `hyperframes` 是 Anime.js、CSS、GSAP、Lottie、Tailwind、Three.js、TypeGPU 和 WAAPI 适配 Skill 的共同创作上下文；`hyperframes-media` 在转写和字幕质检流程中还会读取 `hyperframes` 的 transcript guide，因此这类任务应同时安装两者。`hyperframes-cli` 和 `hyperframes-registry` 按具体工作流单独调用。
+- `hyperframes` 是视频任务入口和路由器；官方核心集还包括 `hyperframes-animation`、`hyperframes-cli`、`hyperframes-core`、`hyperframes-creative`、`hyperframes-keyframes`、`hyperframes-registry` 和 `media-use`，安装时应一起保留。`remotion-to-hyperframes` 只在明确迁移 Remotion 源码时调用。
+- `hyperframes` 会按需通过上游 CLI 安装未入库的专项 workflow。它们不是本仓库核心集的静态前置依赖；运行 `npx hyperframes skills update` 会从上游恢复官方完整 `media-use`，包括本仓库因再分发信息不足而删除的 SFX 音频。
 
 “角色”描述 Skill 如何参与工作流，“类型”描述它的来源。入口、编排或前置关系不会改变其“自建/改编/收录”类型。
 
@@ -103,24 +108,19 @@ Codex 的 `.system`、插件缓存和 `vendor_imports` 不属于可移植的用�
 
 ### HyperFrames Skills
 
-来源：[heygen-com/hyperframes](https://github.com/heygen-com/hyperframes/tree/d2b915be9ea1cb0787629c44bb33c0de8e408722)
+来源：[heygen-com/hyperframes v0.7.52](https://github.com/heygen-com/hyperframes/tree/7498eb4a3a601cff681ca7bc316b696c8de63539)
 
-| Skill | 简介 | 角色 |
-| --- | --- | --- |
-| [`animejs`](./animejs/) | 让 Anime.js 动画由 HyperFrames 时间轴确定性驱动和逐帧定位 | 适配/实现 |
-| [`contribute-catalog`](./contribute-catalog/) | 创建 HyperFrames registry block 或 component，并按上游流程提交贡献 | 贡献/执行 |
-| [`css-animations`](./css-animations/) | 让 CSS keyframes 在 HyperFrames 预览与渲染中可确定性 seek | 适配/实现 |
-| [`gsap`](./gsap/) | 提供 HyperFrames 中 GSAP tween、timeline、stagger 和性能模式 | 方法/实现 |
-| [`hyperframes`](./hyperframes/) | 用 HTML 创建视频、字幕、音频响应效果、文字动画和场景转场 | 基础/编排 |
-| [`hyperframes-cli`](./hyperframes-cli/) | 执行 HyperFrames 初始化、校验、检查、预览、渲染和环境诊断 | 执行 |
-| [`hyperframes-media`](./hyperframes-media/) | 执行本地 TTS、语音转写和图片或视频背景移除 | 预处理/执行 |
-| [`hyperframes-registry`](./hyperframes-registry/) | 安装、发现并接入 HyperFrames registry block 和 component | 集成/执行 |
-| [`lottie`](./lottie/) | 将 lottie-web 与 dotLottie 动画接入 HyperFrames 确定性渲染 | 适配/实现 |
-| [`remotion-to-hyperframes`](./remotion-to-hyperframes/) | 将受支持的 Remotion React 视频组合迁移为 HyperFrames HTML | 迁移/验证 |
-| [`tailwind`](./tailwind/) | 在 HyperFrames 中正确使用 Tailwind CSS v4.2 浏览器运行时 | 适配/实现 |
-| [`three`](./three/) | 将 Three.js 场景、相机和动画接入 HyperFrames seek 事件 | 适配/实现 |
-| [`typegpu`](./typegpu/) | 将 TypeGPU、WebGPU 和 WGSL 渲染接入 HyperFrames 时间轴 | 适配/实现 |
-| [`waapi`](./waapi/) | 将 Web Animations API 动画接入 HyperFrames 确定性逐帧渲染 | 适配/实现 |
+| Skill | 简介 | 类型 | 角色 |
+| --- | --- | --- | --- |
+| [`hyperframes`](./hyperframes/) | 为视频、动画和动态图形请求选择 HyperFrames 专项工作流与领域 Skill | 收录 | 入口/导航 |
+| [`hyperframes-animation`](./hyperframes-animation/) | 提供动作规则、场景蓝图、转场及 GSAP、Lottie、Three.js 等运行时适配 | 改编 | 方法/实现 |
+| [`hyperframes-cli`](./hyperframes-cli/) | 执行初始化、校验、预览、渲染、发布、诊断和云端渲染等 CLI 工作流 | 收录 | 执行 |
+| [`hyperframes-core`](./hyperframes-core/) | 定义 HTML composition、时间属性、轨道、子组合、变量和确定性渲染契约 | 收录 | 基础/实现 |
+| [`hyperframes-creative`](./hyperframes-creative/) | 负责画面规范、配色、字体、旁白、节拍和品牌风格等创意方向 | 改编 | 方法/设计 |
+| [`hyperframes-keyframes`](./hyperframes-keyframes/) | 编写并诊断可 seek 的 2D/3D 关键帧、路径、遮罩、SVG 和 FLIP 动画 | 收录 | 方法/实现 |
+| [`hyperframes-registry`](./hyperframes-registry/) | 安装、发现、接入并贡献 HyperFrames registry block 和 component | 收录 | 集成/执行 |
+| [`media-use`](./media-use/) | 解析、生成、处理和复用音频、图片、图标、旁白、字幕及调色媒体 | 改编 | 预处理/执行 |
+| [`remotion-to-hyperframes`](./remotion-to-hyperframes/) | 将受支持的 Remotion React 视频组合迁移为 HyperFrames HTML 并验证差异 | 改编 | 迁移/验证 |
 
 ### guizang-ppt-skill
 
@@ -195,7 +195,7 @@ Copy-Item .\agently-mail "$env:USERPROFILE\.agents\skills\" -Recurse -Force
 以下用户级 Skill 当前仍在本机，但因来源或再分发条件不足而暂未收录：
 
 - `punkzhou-video-writer`：只找到本机 `local:wenan` 记录，没有可核验的上游 URL 或许可证；
-- `website-to-hyperframes`：代码可追溯到 HyperFrames 的 Apache-2.0 提交，但目录内 19 个 Pixabay 原始 MP3 缺少逐文件作品、作者和来源 URL，不能据现有信息确认可原样再分发；
+- `website-to-hyperframes`：本机旧版已由上游 `website-to-video` 取代；最新稳定版仍含 19 个 Pixabay 原始 MP3，缺少逐文件作品、作者和来源 URL，不能据现有信息确认可原样再分发；
 - `.cc-switch\skills\wenan`：是 `punkzhou-video-writer` 的旧别名副本，目录名与 frontmatter 不一致，也没有单独索引。
 
 以下宿主或运行时内容也没有复制：
@@ -210,8 +210,8 @@ Copy-Item .\agently-mail "$env:USERPROFILE\.agents\skills\" -Recurse -Force
 
 - 第三方 Skill 的著作权归原作者所有，使用和分发必须遵循对应许可证；
 - better-web-ui 不是标准 MIT，公开分发时必须同时公开完整对应源码，且不得作为闭源、专有或收费产品分发；
-- HyperFrames Skill 固定在 `v0.6.42` 的 Apache-2.0 提交；没有用今天已经重组目录的上游 HEAD 冒充本机版本；
-- `guizang-ppt-skill` 固定在仍采用 MIT 的历史提交；当前上游已改用 AGPL-3.0。其内置 `motion@11.11.17` 另按 [Motion MIT 许可证](./licenses/motion-11.11.17-LICENSE.md) 分发；
+- HyperFrames Skill 固定在最新稳定版 `v0.7.52` 的 Apache-2.0 提交；`hyperframes-animation`、`hyperframes-creative` 和 `remotion-to-hyperframes` 修正了上游失效的路径或命令示例，`media-use` 因音频再分发信息不足删除了上游 SFX 文件，四者标记为改编；
+- `guizang-ppt-skill` 保留在 MIT 提交 `6bfa520`：最新稳定 tag 比它更旧，最新 HEAD 只增加赞助信息并改为 AGPL-3.0，没有功能修复。其内置 `motion@11.11.17` 另按 [Motion MIT 许可证](./licenses/motion-11.11.17-LICENSE.md) 分发；
 - `windows-c-drive-cleanup` 是本机协作创建的自建 Skill，没有第三方上游；
 - `agently-mail` 的来源可以确认，但其 Skill 文件未声明许可证；在许可证确认前，不应假定拥有公开再分发权；
 - 本仓库当前没有统一的根许可证，不会覆盖第三方内容各自的条款。
