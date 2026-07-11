@@ -1,3 +1,5 @@
+<!-- Modified from heygen-com/hyperframes v0.7.52: corrected fixture-relative and portable CLI commands. -->
+
 # Eval: how to validate a translation end-to-end
 
 Every translation should be measured. The skill ships three scripts and
@@ -16,26 +18,28 @@ Run them in this order: **lint → render → diff → (if fail) strip**.
 ## Per-fixture flow
 
 ```bash
+# Run from one fixture directory under assets/test-corpus/.
+
 # 1. Lint the source — blockers mean stop
-python3 ../../scripts/lint_source.py ./remotion-src/src/
+python3 ../../../scripts/lint_source.py ./remotion-src/src/
 
 # 2. Generate any binary assets (T2+T3 only)
 [ -f setup.sh ] && ./setup.sh
 
 # 3. Render Remotion baseline
-cd remotion-src && npm install && npm run render
+(cd remotion-src && npm install && npm run render)
 # -> remotion-src/out/baseline.mp4
 
 # 4. Render HF translation
-cd .. && node ../../../packages/cli/dist/cli.js render hf-src/ --output hf.mp4
+npx hyperframes render hf-src/ --output hf.mp4
 # -> hf.mp4
 
 # 5. SSIM diff
-../../scripts/render_diff.sh ./remotion-src/out/baseline.mp4 ./hf.mp4 ./diff
+../../../scripts/render_diff.sh ./remotion-src/out/baseline.mp4 ./hf.mp4 ./diff
 # -> diff/summary.json
 
 # 6. If diff fails, generate frame strip for visual inspection
-../../scripts/frame_strip.sh ./remotion-src/out/baseline.mp4 ./hf.mp4 ./strip 8
+../../../scripts/frame_strip.sh ./remotion-src/out/baseline.mp4 ./hf.mp4 ./strip 8
 # -> strip/strip.png
 ```
 

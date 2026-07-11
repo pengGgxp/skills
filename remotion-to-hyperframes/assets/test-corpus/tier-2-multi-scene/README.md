@@ -1,3 +1,5 @@
+<!-- Modified from heygen-com/hyperframes v0.7.52: corrected commands to preserve the fixture working directory. -->
+
 # Tier 2 — title-image-outro
 
 ## What it tests
@@ -33,14 +35,16 @@ right time. Remotion does this implicitly by virtue of `<Sequence>`'s durationIn
 ## How to render and evaluate
 
 ```bash
+# Run from this fixture directory.
+
 # 1. Generate the binary assets (PNG + WAV) via ffmpeg
 ./setup.sh
 
 # 2. Render Remotion baseline
-cd remotion-src && npm install && npm run render
+(cd remotion-src && npm install && npm run render)
 
 # 3. Render HyperFrames translation
-cd ../hf-src && npx hyperframes render --output ../hf.mp4
+npx hyperframes render hf-src/ --output hf.mp4
 
 # 4. Compare
 ../../../scripts/render_diff.sh ./remotion-src/out/baseline.mp4 ./hf.mp4 ./diff

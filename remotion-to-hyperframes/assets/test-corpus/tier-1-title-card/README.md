@@ -1,3 +1,5 @@
+<!-- Modified from heygen-com/hyperframes v0.7.52: corrected commands to preserve the fixture working directory. -->
+
 # Tier 1 — title-card-fade
 
 ## What it tests
@@ -26,12 +28,14 @@ The Remotion→HF time conversion is `time = frame / fps`. So
 ## How to render and evaluate
 
 ```bash
+# Run from this fixture directory.
+
 # Render Remotion baseline
-cd remotion-src && npm install && npm run render
+(cd remotion-src && npm install && npm run render)
 # Renders to remotion-src/out/baseline.mp4
 
 # Render HyperFrames translation
-cd ../hf-src && npx hyperframes render --output ../hf.mp4
+npx hyperframes render hf-src/ --output hf.mp4
 
 # Compare with the eval harness (from skill scripts/)
 ../../../scripts/render_diff.sh ./remotion-src/out/baseline.mp4 ./hf.mp4 ./diff

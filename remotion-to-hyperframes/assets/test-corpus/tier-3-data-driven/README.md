@@ -1,3 +1,5 @@
+<!-- Modified from heygen-com/hyperframes v0.7.52: corrected commands to preserve the fixture working directory. -->
+
 # Tier 3 — stargazed-data-driven
 
 ## What it tests
@@ -74,11 +76,13 @@ Remotion @ 4.0 with PNG/BT.709 output is 0.953.
 ## How to render and evaluate
 
 ```bash
+# Run from this fixture directory.
+
 # Render Remotion baseline (no setup.sh — no binary assets in this fixture)
-cd remotion-src && npm install && npm run render
+(cd remotion-src && npm install && npm run render)
 
 # Render HyperFrames translation
-cd ../hf-src && npx hyperframes render --output ../hf.mp4
+npx hyperframes render hf-src/ --output hf.mp4
 
 # Compare
 ../../../scripts/render_diff.sh ./remotion-src/out/baseline.mp4 ./hf.mp4 ./diff
