@@ -1,0 +1,4 @@
+interface:
+  display_name: "C盘清理教练"
+  short_description: "帮中文 Windows 小白安全清理 C 盘并减少复发"
+  default_prompt: "Use $windows-c-drive-cleanup 帮我用中文安全清理 Windows C 盘。"
