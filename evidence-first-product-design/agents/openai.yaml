@@ -1,0 +1,4 @@
+interface:
+  display_name: "Evidence-First Product Design"
+  short_description: "Evidence-led UX from product truth to runtime QA"
+  default_prompt: "Use $evidence-first-product-design to design or audit this product experience from verified context through implementation-ready UX."

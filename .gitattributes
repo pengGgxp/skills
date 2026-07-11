@@ -1,0 +1,7 @@
+* text=auto eol=lf
+
+# Preserve verified upstream formatting without failing git diff --check.
+agently-mail/SKILL.md -whitespace
+evidence-first-product-design/references/field-lessons.md -whitespace
+frontend-design/reference/design-principles.md -whitespace
+harden/SKILL.md -whitespace
