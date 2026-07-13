@@ -5,7 +5,7 @@ metadata:
   tags: text, kinetic, typography, beat, rhythm, slam, percussive, punchy
 ---
 
-<!-- Modified from heygen-com/hyperframes v0.7.52: corrected relative file references for portable use. -->
+<!-- Modified from heygen-com/hyperframes v0.7.55: corrected relative file references for portable use. -->
 
 # Kinetic Beat Slam
 

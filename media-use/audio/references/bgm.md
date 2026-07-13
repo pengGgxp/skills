@@ -1,4 +1,4 @@
-<!-- Modified from heygen-com/hyperframes v0.7.52: corrected the root SKILL.md reference. -->
+<!-- Modified from heygen-com/hyperframes v0.7.55: corrected the root SKILL.md reference. -->
 
 # Background music (BGM)
 

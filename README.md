@@ -2,7 +2,7 @@
 
 这是我的个人 Agent Skills 仓库，用于集中保存、整理和维护日常使用的 Skill。仓库同时包含自建 Skill 和经来源、版本、许可证核验后收录的第三方 Skill。
 
-当前快照日期为 **2026-07-11**，共收录 **50 个用户级 Skill**：
+当前快照日期为 **2026-07-13**，共收录 **50 个用户级 Skill**：
 
 | 分组 | 数量 | 类型 | 来源 | 许可证 |
 | --- | ---: | --- | --- | --- |
@@ -10,9 +10,9 @@
 | Layers of Product Design | 9 | 收录 | [jamiemill/layers-skills](https://github.com/jamiemill/layers-skills/tree/a201dc8c2011940b9d93934abb0f40c3b226c7ca) | [MIT](./licenses/layers-skills-LICENSE.txt) |
 | Owl Designer Skills | 14 | 收录 | [Owl-Listener/designer-skills](https://github.com/Owl-Listener/designer-skills/tree/acc3e574b36ef2895268a176dbae886e1b845ae0) | [MIT](./licenses/designer-skills-LICENSE.txt) |
 | better-web-ui | 10 | 收录 | [aladicf/better-web-ui](https://github.com/aladicf/better-web-ui/tree/af21dcfa71d83104a9e0beb04ffedf79f800f53c) | [自定义许可证](./licenses/better-web-ui-LICENSE.txt) |
-| HyperFrames Skills | 9 | 收录 5 / 改编 4 | [heygen-com/hyperframes v0.7.52](https://github.com/heygen-com/hyperframes/tree/7498eb4a3a601cff681ca7bc316b696c8de63539) | [Apache-2.0](./licenses/hyperframes-LICENSE.txt) |
+| HyperFrames Skills | 9 | 收录 4 / 改编 5 | [heygen-com/hyperframes v0.7.55](https://github.com/heygen-com/hyperframes/tree/c830aa83c588b755552eb3725ea2d8e0bb3dd2c8) | [Apache-2.0](./licenses/hyperframes-LICENSE.txt) |
 | guizang-ppt-skill | 1 | 收录 | [op7418/guizang-ppt-skill](https://github.com/op7418/guizang-ppt-skill/tree/6bfa520b86ed5a3dffdac0a3323155e2b6f516b6) | [MIT](./guizang-ppt-skill/LICENSE) |
-| Matt Pocock Skills | 3 | 收录 | [mattpocock/skills](https://github.com/mattpocock/skills/tree/391a2701dd948f94f56a39f7533f8eea9a859c87) | [MIT](./licenses/mattpocock-skills-LICENSE.txt) |
+| Matt Pocock Skills | 3 | 收录 | [mattpocock/skills v1.1.0](https://github.com/mattpocock/skills/tree/d574778f94cf620fcc8ce741584093bc650a61d3) | [MIT](./licenses/mattpocock-skills-LICENSE.txt) |
 | Obsidian Skills | 1 | 收录 | [kepano/obsidian-skills](https://github.com/kepano/obsidian-skills/tree/a1dc48e68138490d522c04cbf5822214c6eb1202) | [MIT](./licenses/obsidian-skills-LICENSE.txt) |
 | Agently Mail | 1 | 收录 | [agent.qq.com](https://agent.qq.com/.well-known/skills/agently-mail/SKILL.md) | 待确认 |
 
@@ -108,13 +108,13 @@ Codex 的 `.system`、插件缓存和 `vendor_imports` 不属于可移植的用�
 
 ### HyperFrames Skills
 
-来源：[heygen-com/hyperframes v0.7.52](https://github.com/heygen-com/hyperframes/tree/7498eb4a3a601cff681ca7bc316b696c8de63539)
+来源：[heygen-com/hyperframes v0.7.55](https://github.com/heygen-com/hyperframes/tree/c830aa83c588b755552eb3725ea2d8e0bb3dd2c8)
 
 | Skill | 简介 | 类型 | 角色 |
 | --- | --- | --- | --- |
 | [`hyperframes`](./hyperframes/) | 为视频、动画和动态图形请求选择 HyperFrames 专项工作流与领域 Skill | 收录 | 入口/导航 |
 | [`hyperframes-animation`](./hyperframes-animation/) | 提供动作规则、场景蓝图、转场及 GSAP、Lottie、Three.js 等运行时适配 | 改编 | 方法/实现 |
-| [`hyperframes-cli`](./hyperframes-cli/) | 执行初始化、校验、预览、渲染、发布、诊断和云端渲染等 CLI 工作流 | 收录 | 执行 |
+| [`hyperframes-cli`](./hyperframes-cli/) | 执行初始化、校验、预览、渲染、发布、诊断和云端渲染等 CLI 工作流 | 改编 | 执行 |
 | [`hyperframes-core`](./hyperframes-core/) | 定义 HTML composition、时间属性、轨道、子组合、变量和确定性渲染契约 | 收录 | 基础/实现 |
 | [`hyperframes-creative`](./hyperframes-creative/) | 负责画面规范、配色、字体、旁白、节拍和品牌风格等创意方向 | 改编 | 方法/设计 |
 | [`hyperframes-keyframes`](./hyperframes-keyframes/) | 编写并诊断可 seek 的 2D/3D 关键帧、路径、遮罩、SVG 和 FLIP 动画 | 收录 | 方法/实现 |
@@ -132,7 +132,7 @@ Codex 的 `.system`、插件缓存和 `vendor_imports` 不属于可移植的用�
 
 ### Matt Pocock Skills
 
-来源：[mattpocock/skills](https://github.com/mattpocock/skills/tree/391a2701dd948f94f56a39f7533f8eea9a859c87)
+来源：[mattpocock/skills v1.1.0](https://github.com/mattpocock/skills/tree/d574778f94cf620fcc8ce741584093bc650a61d3)
 
 | Skill | 简介 | 角色 |
 | --- | --- | --- |
@@ -210,7 +210,7 @@ Copy-Item .\agently-mail "$env:USERPROFILE\.agents\skills\" -Recurse -Force
 
 - 第三方 Skill 的著作权归原作者所有，使用和分发必须遵循对应许可证；
 - better-web-ui 不是标准 MIT，公开分发时必须同时公开完整对应源码，且不得作为闭源、专有或收费产品分发；
-- HyperFrames Skill 固定在最新稳定版 `v0.7.52` 的 Apache-2.0 提交；`hyperframes-animation`、`hyperframes-creative` 和 `remotion-to-hyperframes` 修正了上游失效的路径或命令示例，`media-use` 因音频再分发信息不足删除了上游 SFX 文件，四者标记为改编；
+- HyperFrames Skill 固定在最新稳定版 `v0.7.55` 的 Apache-2.0 提交；`hyperframes-animation`、`hyperframes-cli`、`hyperframes-creative` 和 `remotion-to-hyperframes` 修正了上游失效的路径、旧命名或命令示例，`media-use` 因音频再分发信息不足删除了上游 SFX 文件，五者标记为改编；
 - `guizang-ppt-skill` 保留在 MIT 提交 `6bfa520`：最新稳定 tag 比它更旧，最新 HEAD 只增加赞助信息并改为 AGPL-3.0，没有功能修复。其内置 `motion@11.11.17` 另按 [Motion MIT 许可证](./licenses/motion-11.11.17-LICENSE.md) 分发；
 - `windows-c-drive-cleanup` 是本机协作创建的自建 Skill，没有第三方上游；
 - `agently-mail` 的来源可以确认，但其 Skill 文件未声明许可证；在许可证确认前，不应假定拥有公开再分发权；

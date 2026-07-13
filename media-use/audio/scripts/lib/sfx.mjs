@@ -1,4 +1,4 @@
-// Modified from heygen-com/hyperframes v0.7.52: uses an explicit, schema- and path-validated local SFX library.
+// Modified from heygen-com/hyperframes v0.7.55: uses an explicit, schema- and path-validated local SFX library.
 // sfx.mjs — sound effects for the media audio engine. Provider-gated (NOT a
 // per-cue merge): the decision is made once, by whether HeyGen is configured —
 // mirroring how TTS and BGM degrade.

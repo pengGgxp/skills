@@ -1,3 +1,5 @@
+<!-- Modified from heygen-com/hyperframes v0.7.55: corrected the current core skill names and install scope. -->
+
 # init, capture, skills
 
 Scaffolding commands. Use these instead of creating files by hand — they set up the right file structure, copy media, run transcription, and install AI coding skills.
@@ -48,4 +50,4 @@ Captures a live URL as an editable HyperFrames project: screenshots become layer
 npx hyperframes skills    # install HyperFrames skills for AI coding tools
 ```
 
-One-time setup that adds the HyperFrames skill pack (`hyperframes-core`, `-creative`, `-animation`, `-cli`, `-registry`, `-media`, plus the `product-launch-video` and `hyperframes` orchestrators) to the local AI coding environment so agents follow the framework conventions. Re-run after major HyperFrames upgrades.
+One-time setup that installs the complete published HyperFrames skill pack into supported AI coding environments. The core set is `hyperframes`, `hyperframes-animation`, `hyperframes-cli`, `hyperframes-core`, `hyperframes-creative`, `hyperframes-keyframes`, `hyperframes-registry`, and `media-use`; the command also installs the current on-demand workflows. Re-run after major HyperFrames upgrades.

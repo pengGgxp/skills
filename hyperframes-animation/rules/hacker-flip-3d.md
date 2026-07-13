@@ -5,7 +5,7 @@ metadata:
   tags: text, 3d, reveal, decode, hacker, randomization, perspective
 ---
 
-<!-- Modified from heygen-com/hyperframes v0.7.52: corrected relative file references for portable use. -->
+<!-- Modified from heygen-com/hyperframes v0.7.55: corrected relative file references for portable use. -->
 
 # Hacker Flip 3D Reveal
 

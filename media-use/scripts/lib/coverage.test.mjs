@@ -1,5 +1,5 @@
 import { strict as assert } from "node:assert";
-// Modified from heygen-com/hyperframes v0.7.52: no longer requires the excluded bundled SFX manifest.
+// Modified from heygen-com/hyperframes v0.7.55: no longer requires the excluded bundled SFX manifest.
 import { test } from "node:test";
 import { existsSync, readdirSync } from "node:fs";
 import { join, dirname } from "node:path";

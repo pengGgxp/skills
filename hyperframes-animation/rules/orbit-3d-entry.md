@@ -5,7 +5,7 @@ metadata:
   tags: orbit, 3d, flip, ellipse, circular, icon, entry, continuous
 ---
 
-<!-- Modified from heygen-com/hyperframes v0.7.52: corrected relative file references for portable use. -->
+<!-- Modified from heygen-com/hyperframes v0.7.55: corrected relative file references for portable use. -->
 
 # Orbit with 3D Entry
 

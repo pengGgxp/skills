@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Modified from heygen-com/hyperframes v0.7.52: replaced the bundled SFX fallback with an explicit local library.
+// Modified from heygen-com/hyperframes v0.7.55: replaced the bundled SFX fallback with an explicit local library.
 // audio.mjs — the shared HyperFrames audio engine. ONE implementation of TTS +
 // BGM + SFX for every video workflow (product-launch, general-video, pr-to-video,
 // …). Workflows do NOT vendor a copy: they write a neutral `audio_request.json`
@@ -8,7 +8,7 @@
 //   node <MEDIA_DIR>/scripts/audio.mjs --request ./audio_request.json --hyperframes . --out ./audio_meta.json
 //
 // The three capabilities degrade on ONE switch — whether HeyGen is configured
-// (credential present, NOT the CLI). This mirrors the table in ../SKILL.md:
+// (credential present, NOT the CLI). This mirrors the table in ../../SKILL.md:
 //
 //   TTS : HeyGen REST → ElevenLabs → Kokoro (CLI)
 //   BGM : HeyGen retrieve  → (no credential) Lyria/MusicGen generate
@@ -146,7 +146,7 @@ if (only.has("tts") && lines.length) {
     }
     const rel = `assets/voice/${id}.wav`;
     const abs = join(hyperframesDir, rel);
-    const { ok, words } = await synthesizeOne({
+    const { ok, words, error } = await synthesizeOne({
       provider: ttsProvider,
       text,
       voiceId,
@@ -156,7 +156,7 @@ if (only.has("tts") && lines.length) {
       hyperframesDir,
     });
     if (!ok) {
-      anomalies.push(`line ${id}: TTS failed — omitted`);
+      anomalies.push(`line ${id}: TTS failed — omitted${error ? ` (${error})` : ""}`);
       return null;
     }
     let wordArr = words; // heygen: native; else transcribe

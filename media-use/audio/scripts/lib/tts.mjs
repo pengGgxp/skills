@@ -1,5 +1,6 @@
+// Modified from heygen-com/hyperframes v0.7.55: corrected the root Skill link and made duration probing testable.
 // tts.mjs — multi-provider TTS for the media audio engine. The provider chain,
-// auto-detected from env, is the one documented in ../SKILL.md:
+// auto-detected from env, is the one documented in ../../../SKILL.md:
 //
 //   1. HeyGen (Starfish)  — $HEYGEN_API_KEY / $HYPERFRAMES_API_KEY / ~/.heygen.
 //        Direct v3 REST (NOT `hyperframes tts`, which in the published build is
@@ -101,18 +102,18 @@ export function parseFfmpegDurationBanner(stderrText) {
 // otherwise reads a spurious NaN as "the WAV file is corrupt" and drops an
 // already-successfully-synthesized TTS line, rather than "the tool for
 // measuring it is missing".
-function ffmpegDurationFallback(absPath) {
-  const r = spawnSync("ffmpeg", ["-i", absPath], { encoding: "utf8" });
+function ffmpegDurationFallback(absPath, spawnSyncFn = spawnSync) {
+  const r = spawnSyncFn("ffmpeg", ["-i", absPath], { encoding: "utf8" });
   return parseFfmpegDurationBanner(r.stderr);
 }
 
-export function ffprobeDuration(absPath) {
-  const r = spawnSync(
+export function ffprobeDuration(absPath, spawnSyncFn = spawnSync) {
+  const r = spawnSyncFn(
     "ffprobe",
     ["-v", "error", "-show_entries", "format=duration", "-of", "default=nw=1:nk=1", absPath],
     { encoding: "utf8" },
   );
-  if (r.error?.code === "ENOENT") return ffmpegDurationFallback(absPath);
+  if (r.error?.code === "ENOENT") return ffmpegDurationFallback(absPath, spawnSyncFn);
   if (r.status !== 0) return NaN;
   return parseFloat(String(r.stdout).trim());
 }
@@ -126,6 +127,17 @@ export function resolveNpxCliFromNpmExecPath(
   const npxCliPath =
     fileName === "npx-cli.js" ? npmExecPath : join(dirname(npmExecPath), "npx-cli.js");
   return pathExists(npxCliPath) ? npxCliPath : null;
+}
+
+export function resolveNpxCliPath(
+  npmExecPath = process.env.npm_execpath,
+  nodeExecPath = process.env.npm_node_execpath || process.execPath,
+  pathExists = existsSync,
+) {
+  const fromNpm = resolveNpxCliFromNpmExecPath(npmExecPath, pathExists);
+  if (fromNpm) return fromNpm;
+  const besideNode = join(dirname(nodeExecPath), "node_modules", "npm", "bin", "npx-cli.js");
+  return pathExists(besideNode) ? besideNode : null;
 }
 
 export function resolveSpawnCommand(
@@ -143,10 +155,11 @@ export function resolveSpawnCommand(
   // On Windows, npx resolves to npx.cmd, which Node cannot execute directly.
   // Avoid `shell:true` and the .cmd shim entirely by invoking npm's JS CLI with
   // node, preserving request-provided values as argv data instead of shell text.
-  const npxCliPath = resolveNpxCliFromNpmExecPath(env.npm_execpath, pathExists);
+  const nodeExecPath = env.npm_node_execpath || process.execPath;
+  const npxCliPath = resolveNpxCliPath(env.npm_execpath, nodeExecPath, pathExists);
   if (!npxCliPath) return null;
   return {
-    cmd: env.npm_node_execpath || process.execPath,
+    cmd: nodeExecPath,
     args: [npxCliPath, ...args.map((arg) => String(arg))],
     opts: { stdio: "ignore", windowsHide: true, ...opts },
   };
@@ -174,17 +187,17 @@ export function spawnP(
   const resolved = resolveSpawnCommand(cmd, args, opts, platform, env, pathExists);
   if (!resolved) {
     // resolveSpawnCommand only returns null for the npx-on-win32 case where
-    // npm_execpath isn't set (e.g. audio.mjs invoked directly with `node`, not
-    // through npm/npx). Without this, every call silently returns status:-1 and
-    // stdio:"ignore" hides why — callers just report "TTS failed - omitted" for
-    // every line. Surface the real reason once so it's diagnosable.
+    // neither npm's configured CLI nor the beside-node fallback exists. Without
+    // this, every call silently returns status:-1 and stdio:"ignore" hides why.
     if (!_warnedNpxResolution) {
       _warnedNpxResolution = true;
+      const reason = env.npm_execpath
+        ? `npm_execpath (${env.npm_execpath}) and the beside-node npm fallback could not be found`
+        : "npm_execpath is unset and the beside-node npm fallback could not be found";
       console.error(
-        `[media-use] Cannot run "${cmd}" on Windows: npm_execpath is not set, so the ` +
-          `npx JS CLI can't be located. This happens when this script is run directly with ` +
-          `\`node\` instead of through npm/npx. Every "${cmd}" call is being skipped. ` +
-          `Fix: run via \`npx\`/\`npm run\`, or export npm_execpath pointing at your npm-cli.js.`,
+        `[media-use] Cannot run "${cmd}" on Windows: ${reason}. ` +
+          `Every "${cmd}" call is being skipped. Install npm with Node, or run via ` +
+          `\`npx\`/\`npm run\` with a valid npm_execpath.`,
       );
     }
     return Promise.resolve({ status: -1 });
@@ -225,9 +238,10 @@ save(audio, sys.argv[3])
 `;
 
 // ── synthesize one line ───────────────────────────────────────────────────────
-// Writes wav at wavAbs. Returns { ok, words } — words is the raw
+// Writes wav at wavAbs. Returns { ok, words, error } — words is the raw
 // [{text,start,end}] array for HeyGen (native), or null for ElevenLabs/Kokoro
-// (caller must transcribeWav). Never throws; failures return { ok:false }.
+// (caller must transcribeWav). Never throws; failures return { ok:false, error }
+// where `error` states WHY (so the caller can surface it, not a bare "TTS failed").
 export async function synthesizeOne({
   provider,
   text,
@@ -259,34 +273,61 @@ export async function synthesizeOne({
       wavAbs,
     ]);
     const r = await spawnP(cmd, args, {});
-    return { ok: r.status === 0 && existsSync(wavAbs), words: null };
+    return synthResult(r, wavAbs, "elevenlabs (python)");
   }
   // kokoro — via the published CLI; --output is relative to the project dir.
   const wavRel = relTo(hyperframesDir, wavAbs);
   const args = ["hyperframes", "tts", writeTmpText(text), "--voice", voiceId, "--output", wavRel];
   if (lang !== "en") args.push("--lang", lang);
   const r = await spawnP("npx", args, { cwd: hyperframesDir });
-  return { ok: r.status === 0 && existsSync(wavAbs), words: null };
+  return synthResult(r, wavAbs, "kokoro (npx hyperframes tts)");
 }
 
-async function synthesizeHeygen({ text, voiceId, lang, speed, wavAbs }) {
+// Shape a spawn result into { ok, words, error }, naming why on failure so the
+// caller surfaces it instead of a bare "TTS failed".
+export function synthResult(r, wavAbs, label) {
+  if (r.status === 0 && existsSync(wavAbs)) return { ok: true, words: null };
+  const why =
+    r.status !== 0 ? `${label} exited with status ${r.status}` : `${label} produced no wav file`;
+  return { ok: false, words: null, error: why };
+}
+
+// `deps` is injectable for tests; production uses the real network/ffmpeg impls.
+// Every failure path returns an `error` string so the caller can surface WHY a
+// line was dropped instead of the bare "TTS failed" that hid the real cause
+// (e.g. an HTTP 402 plan_upgrade_required thrown by heygenJSON was swallowed).
+export async function synthesizeHeygen({ text, voiceId, lang, speed, wavAbs }, deps = {}) {
+  const requestJSON = deps.heygenJSON ?? heygenJSON;
+  const authHeaders = deps.heygenAuthHeaders ?? heygenAuthHeaders;
+  const fetchImpl = deps.fetch ?? fetch;
+  const transcode = deps.transcodeToWav ?? transcodeToWav;
   try {
     const body = { text, voice_id: voiceId, speed };
     if (lang !== "en") body.language = lang;
-    const payload = await heygenJSON(`/voices/speech`, {
+    const payload = await requestJSON(`/voices/speech`, {
       method: "POST",
-      headers: heygenAuthHeaders(),
+      headers: authHeaders(),
       body,
     });
     const inner = payload.data ?? payload;
-    if (!inner.audio_url) return { ok: false, words: null };
-    const res = await fetch(inner.audio_url);
-    if (!res.ok) return { ok: false, words: null };
+    if (!inner.audio_url) {
+      return { ok: false, words: null, error: "HeyGen /voices/speech returned no audio_url" };
+    }
+    const res = await fetchImpl(inner.audio_url);
+    if (!res.ok) {
+      return { ok: false, words: null, error: `audio_url fetch failed: HTTP ${res.status}` };
+    }
     const bytes = Buffer.from(await res.arrayBuffer());
     // .wav output → transcode to 44.1k mono; .mp3 → raw bytes (no ffmpeg). The
     // engine always asks for .wav; the standalone heygen-tts CLI may ask for .mp3.
     if (wavAbs.endsWith(".wav")) {
-      if (!transcodeToWav(bytes, wavAbs)) return { ok: false, words: null };
+      if (!transcode(bytes, wavAbs)) {
+        return {
+          ok: false,
+          words: null,
+          error: "wav transcode failed (ffmpeg)",
+        };
+      }
     } else {
       mkdirSync(dirname(wavAbs), { recursive: true });
       writeFileSync(wavAbs, bytes);
@@ -298,8 +339,8 @@ async function synthesizeHeygen({ text, voiceId, lang, speed, wavAbs }) {
           .map((w) => ({ text: w.word, start: w.start, end: w.end }))
       : [];
     return { ok: true, words };
-  } catch {
-    return { ok: false, words: null };
+  } catch (e) {
+    return { ok: false, words: null, error: e?.message ? String(e.message) : String(e) };
   }
 }
 

@@ -1,9 +1,16 @@
+// Modified from heygen-com/hyperframes v0.7.55: made the ffprobe fallback test host-platform portable.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync, writeFileSync, chmodSync, rmSync, existsSync } from "node:fs";
+import { mkdtempSync, rmSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { tmpdir } from "node:os";
-import { parseFfmpegDurationBanner, ffprobeDuration, synthesizeOne } from "./tts.mjs";
+import {
+  parseFfmpegDurationBanner,
+  ffprobeDuration,
+  synthesizeOne,
+  synthesizeHeygen,
+  synthResult,
+} from "./tts.mjs";
 
 test("parseFfmpegDurationBanner reads ffmpeg's stderr Duration line", () => {
   const stderr = [
@@ -31,26 +38,20 @@ test("parseFfmpegDurationBanner returns NaN when there is no Duration line", () 
 // with no ffprobe.exe) and "file is genuinely unreadable" into the same NaN,
 // giving audio.mjs no way to tell "measure differently" from "give up".
 //
-// Builds an isolated PATH containing only a fake `ffmpeg` stub (no `ffprobe`
-// at all) so ffprobeDuration's spawnSync("ffprobe", ...) call ENOENTs for
-// real, then verifies it recovers the duration via the ffmpeg fallback
-// instead of returning NaN.
+// Inject a deterministic process result so this also exercises the fallback on
+// Windows, where a shell-script ffmpeg fixture is not directly executable.
 test("ffprobeDuration falls back to ffmpeg when the ffprobe binary itself is missing", () => {
-  const dir = mkdtempSync(join(tmpdir(), "tts-ffprobe-fallback-"));
-  const fakeFfmpeg = join(dir, "ffmpeg");
-  writeFileSync(
-    fakeFfmpeg,
-    "#!/bin/sh\necho 'Duration: 00:00:02.50, start: 0.000000, bitrate: 128 kb/s' 1>&2\nexit 1\n",
-  );
-  chmodSync(fakeFfmpeg, 0o755);
-  const originalPath = process.env.PATH;
-  try {
-    process.env.PATH = dir; // only the fake ffmpeg resolves; no real ffprobe on this PATH
-    assert.equal(ffprobeDuration("/does/not/matter.wav"), 2.5);
-  } finally {
-    process.env.PATH = originalPath;
-    rmSync(dir, { recursive: true, force: true });
-  }
+  const calls = [];
+  const spawnSyncFn = (command) => {
+    calls.push(command);
+    if (command === "ffprobe") return { error: { code: "ENOENT" } };
+    return {
+      status: 1,
+      stderr: "Duration: 00:00:02.50, start: 0.000000, bitrate: 128 kb/s",
+    };
+  };
+  assert.equal(ffprobeDuration("/does/not/matter.wav", spawnSyncFn), 2.5);
+  assert.deepEqual(calls, ["ffprobe", "ffmpeg"]);
 });
 
 test("ffprobeDuration returns NaN when neither ffprobe nor ffmpeg resolve", () => {
@@ -86,4 +87,66 @@ test("synthesizeOne(elevenlabs) creates the output dir before writing", async ()
     else process.env.ELEVENLABS_API_KEY = savedKey;
     rmSync(dir, { recursive: true, force: true });
   }
+});
+
+test("synthesizeHeygen surfaces a thrown HTTP error (e.g. 402) instead of swallowing it", async () => {
+  const res = await synthesizeHeygen(
+    { text: "hi", voiceId: "v1", lang: "en", speed: 1, wavAbs: "/tmp/x.wav" },
+    {
+      heygenAuthHeaders: () => ({}),
+      heygenJSON: async () => {
+        throw new Error("HeyGen POST /voices/speech → HTTP 402\nplan_upgrade_required");
+      },
+    },
+  );
+  assert.equal(res.ok, false);
+  assert.match(res.error, /402/);
+  assert.match(res.error, /plan_upgrade_required/);
+});
+
+test("synthesizeHeygen surfaces a failed audio_url fetch with its status", async () => {
+  const res = await synthesizeHeygen(
+    { text: "hi", voiceId: "v1", lang: "en", speed: 1, wavAbs: "/tmp/x.wav" },
+    {
+      heygenAuthHeaders: () => ({}),
+      heygenJSON: async () => ({ data: { audio_url: "http://audio.example/x" } }),
+      fetch: async () => ({ ok: false, status: 403 }),
+    },
+  );
+  assert.equal(res.ok, false);
+  assert.match(res.error, /HTTP 403/);
+});
+
+test("synthesizeHeygen reports a missing audio_url", async () => {
+  const res = await synthesizeHeygen(
+    { text: "hi", voiceId: "v1", lang: "en", speed: 1, wavAbs: "/tmp/x.wav" },
+    { heygenAuthHeaders: () => ({}), heygenJSON: async () => ({}) },
+  );
+  assert.equal(res.ok, false);
+  assert.match(res.error, /no audio_url/);
+});
+
+test("synthesizeHeygen reports wav transcode failures", async () => {
+  const dir = mkdtempSync(join(tmpdir(), "hf-tts-test-"));
+  try {
+    const res = await synthesizeHeygen(
+      { text: "hi", voiceId: "v1", lang: "en", speed: 1, wavAbs: join(dir, "voice.wav") },
+      {
+        heygenAuthHeaders: () => ({}),
+        heygenJSON: async () => ({ data: { audio_url: "http://audio.example/x" } }),
+        fetch: async () => ({ ok: true, status: 200, arrayBuffer: async () => new ArrayBuffer(0) }),
+        transcodeToWav: () => false,
+      },
+    );
+    assert.equal(res.ok, false);
+    assert.equal(res.error, "wav transcode failed (ffmpeg)");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("synthResult names a non-zero subprocess exit", () => {
+  const res = synthResult({ status: 2 }, "/tmp/none.wav", "kokoro (npx hyperframes tts)");
+  assert.equal(res.ok, false);
+  assert.match(res.error, /kokoro .* exited with status 2/);
 });

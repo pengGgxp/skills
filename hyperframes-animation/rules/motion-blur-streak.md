@@ -5,7 +5,7 @@ metadata:
   tags: motion-blur, velocity, streak, entrance, fly-in, ghost, echo, svg-filter, kinetic, camera, snap
 ---
 
-<!-- Modified from heygen-com/hyperframes v0.7.52: corrected relative file references for portable use. -->
+<!-- Modified from heygen-com/hyperframes v0.7.55: corrected relative file references for portable use. -->
 
 # Motion-Blur Streak
 

@@ -3,7 +3,7 @@ name: media-use
 description: Agent Media OS, the single skill for every media need in a HyperFrames project. Resolve BGM, SFX, image, icon, brand logo, voice, color grade, or LUT into a frozen local file or paste-ready block + ledger record (one verb, `resolve`); generate via TTS / music / image models when the catalog misses; produce voiceover, transcription, captions, and background removal through one shared audio engine; operate on media (cut / reframe / transform); and reuse assets across projects. Keeps search noise on disk, hands the agent one path or block. Use for any audio, image, icon, logo, voiceover, caption, color-grading, or media-asset need.
 ---
 
-<!-- Modified from heygen-com/hyperframes v0.7.52: removed bundled SFX redistribution and documented the explicit local-library fallback. -->
+<!-- Modified from heygen-com/hyperframes v0.7.55: removed bundled SFX redistribution and documented the explicit local-library fallback. -->
 
 # media-use
 

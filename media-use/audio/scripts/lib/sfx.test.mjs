@@ -1,4 +1,4 @@
-// Modified from heygen-com/hyperframes v0.7.52: tests the explicit local SFX library and its safety checks.
+// Modified from heygen-com/hyperframes v0.7.55: tests the explicit local SFX library and its safety checks.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { mkdtempSync, mkdirSync, writeFileSync, existsSync, rmSync } from "node:fs";

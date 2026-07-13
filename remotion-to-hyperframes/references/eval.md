@@ -1,4 +1,4 @@
-<!-- Modified from heygen-com/hyperframes v0.7.52: corrected fixture-relative and portable CLI commands. -->
+<!-- Modified from heygen-com/hyperframes v0.7.55: corrected fixture-relative and portable CLI commands. -->
 
 # Eval: how to validate a translation end-to-end
 

@@ -1,5 +1,5 @@
 import { strict as assert } from "node:assert";
-// Modified from heygen-com/hyperframes v0.7.52: tests the no-bundled-SFX fallback behavior.
+// Modified from heygen-com/hyperframes v0.7.55: tests the no-bundled-SFX fallback behavior.
 import { test } from "node:test";
 import { mkdtempSync, rmSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";

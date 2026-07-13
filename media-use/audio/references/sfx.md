@@ -1,4 +1,4 @@
-<!-- Modified from heygen-com/hyperframes v0.7.52: documented the excluded SFX bundle and safe explicit local-library behavior. -->
+<!-- Modified from heygen-com/hyperframes v0.7.55: documented the excluded SFX bundle and safe explicit local-library behavior. -->
 
 # Sound effects (SFX)
 

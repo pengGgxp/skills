@@ -1,4 +1,4 @@
-<!-- Modified from heygen-com/hyperframes v0.7.52: corrected commands to preserve the fixture working directory. -->
+<!-- Modified from heygen-com/hyperframes v0.7.55: corrected commands to preserve the fixture working directory. -->
 
 # Tier 2 — title-image-outro
 

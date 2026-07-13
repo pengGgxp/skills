@@ -1,4 +1,4 @@
-<!-- Modified from heygen-com/hyperframes v0.7.52: adjusted the LICENSE link for this repository layout. -->
+<!-- Modified from heygen-com/hyperframes v0.7.55: adjusted the LICENSE link for this repository layout. -->
 
 # Credits
 
