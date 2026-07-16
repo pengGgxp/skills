@@ -30,7 +30,7 @@ README 中的“类型”和“角色”是两个不同维度：
 - 只有其他 Skill 在缺少它时无法正确工作，才标记为“前置依赖”，并明确调用顺序；
 - 编排 Skill 如果会调用其他 Skill，应在自身文档中列出选择规则和实际依赖，不要笼统要求每次加载全部 Skill。
 
-当前 `evidence-first-product-design` 是入口/编排 Skill，但不是其他 Skill 的强制前置；`layers-intro` 是其他 `layers-*` Skill 的真实前置。
+当前 `content-repurposing-pipeline` 是编排/执行 Skill，依赖 OpenClaw 工作区配套目录，但不是其他 Skill 的前置；`evidence-first-product-design` 是入口/编排 Skill，但不是其他 Skill 的强制前置；`layers-intro` 是其他 `layers-*` Skill 的真实前置。
 
 ## 版本维护策略
 

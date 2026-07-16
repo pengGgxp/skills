@@ -2,11 +2,11 @@
 
 这是我的个人 Agent Skills 仓库，用于集中保存、整理和维护日常使用的 Skill。仓库同时包含自建 Skill 和经来源、版本、许可证核验后收录的第三方 Skill。
 
-当前快照日期为 **2026-07-13**，共收录 **50 个用户级 Skill**：
+当前快照日期为 **2026-07-16**，共收录 **51 个用户级 Skill**：
 
 | 分组 | 数量 | 类型 | 来源 | 许可证 |
 | --- | ---: | --- | --- | --- |
-| 自建 Skill | 2 | 自建 | 本仓库与本机协作维护 | 尚未单独声明 |
+| 自建 Skill | 3 | 自建 | 本仓库与本机协作维护 | 尚未单独声明 |
 | Layers of Product Design | 9 | 收录 | [jamiemill/layers-skills](https://github.com/jamiemill/layers-skills/tree/a201dc8c2011940b9d93934abb0f40c3b226c7ca) | [MIT](./licenses/layers-skills-LICENSE.txt) |
 | Owl Designer Skills | 14 | 收录 | [Owl-Listener/designer-skills](https://github.com/Owl-Listener/designer-skills/tree/acc3e574b36ef2895268a176dbae886e1b845ae0) | [MIT](./licenses/designer-skills-LICENSE.txt) |
 | better-web-ui | 10 | 收录 | [aladicf/better-web-ui](https://github.com/aladicf/better-web-ui/tree/af21dcfa71d83104a9e0beb04ffedf79f800f53c) | [自定义许可证](./licenses/better-web-ui-LICENSE.txt) |
@@ -34,6 +34,7 @@ Codex 的 `.system`、插件缓存和 `vendor_imports` 不属于可移植的用�
 
 ## 入口与依赖
 
+- [`content-repurposing-pipeline`](./content-repurposing-pipeline/) 是内容复用工作流的**编排/执行 Skill**。处理内容信号前必须读取其 `pipeline-contract.md`；只有明确使用或已授权飞书审核同步时才读取 `feishu-review.md`。它不是其他 Skill 的前置依赖。
 - [`evidence-first-product-design`](./evidence-first-product-design/) 是本仓库的主要**入口/编排 Skill**。它会根据任务选择少量相关 Skill，但不是使用其他 Skill 前必须调用的前置步骤。
 - [`layers-intro`](./layers-intro/) 是 Layers of Product Design 的**框架入口和真实前置依赖**；使用其他 `layers-*` Skill 前应先加载它。
 - `frontend-design` 会按需引用 `clarify`、`animate` 和 `optimize`，但并不要求每次前端任务都调用这三个 Skill。
@@ -49,6 +50,7 @@ Codex 的 `.system`、插件缓存和 `vendor_imports` 不属于可移植的用�
 
 | Skill | 简介 | 角色 |
 | --- | --- | --- |
+| [`content-repurposing-pipeline`](./content-repurposing-pipeline/) | 将获授权的工作记录、笔记、事故和研究转化为经证据核验、脱敏和哈希审批的母稿及平台草稿 | 编排/执行 |
 | [`evidence-first-product-design`](./evidence-first-product-design/) | 从项目事实和上下文发现出发，按需编排产品策略、概念模型、交互、视觉实现与运行时 QA | 入口/编排 |
 | [`windows-c-drive-cleanup`](./windows-c-drive-cleanup/) | 为中文 Windows 初学者安全扫描和清理 C 盘，并给出常见国内应用缓存与习惯修复建议 | 诊断/执行 |
 
@@ -178,7 +180,7 @@ New-Item -ItemType Directory -Force "$env:USERPROFILE\.agents\skills" | Out-Null
 
 Get-ChildItem -Directory |
   Where-Object {
-    $_.Name -ne 'agently-mail' -and
+    $_.Name -notin @('agently-mail', 'content-repurposing-pipeline') -and
     (Test-Path (Join-Path $_.FullName 'SKILL.md'))
   } |
   ForEach-Object {
@@ -186,9 +188,15 @@ Get-ChildItem -Directory |
   }
 
 Copy-Item .\agently-mail "$env:USERPROFILE\.agents\skills\" -Recurse -Force
+
+$openClawWorkspace = 'D:\OpenClaw\workspace\main' # 按实际路径调整
+New-Item -ItemType Directory -Force "$openClawWorkspace\skills" | Out-Null
+Copy-Item .\content-repurposing-pipeline "$openClawWorkspace\skills\" -Recurse -Force
 ```
 
 复制后重新启动或重新加载 Agent。不要只复制 `SKILL.md`；部分 Skill 还依赖同目录下的 `references/`、`scripts/`、`assets/` 或 `agents/`。该命令恢复为普通目录，不复刻本机 cc-switch 的符号链接布局。
+
+`content-repurposing-pipeline` 应保留在 `<openclaw-main-workspace>\skills` 下，使校验器能从自身位置找到同一工作区的 `content-hub` 和 `private\content-pipeline`。安装到其他位置时，运行校验器必须显式传入 `--content-hub` 和 `--private-root`；校验器要求 Python 3.10+ 和 PyYAML。
 
 ## 未收录内容
 
@@ -212,6 +220,7 @@ Copy-Item .\agently-mail "$env:USERPROFILE\.agents\skills\" -Recurse -Force
 - better-web-ui 不是标准 MIT，公开分发时必须同时公开完整对应源码，且不得作为闭源、专有或收费产品分发；
 - HyperFrames Skill 固定在最新稳定版 `v0.7.55` 的 Apache-2.0 提交；`hyperframes-animation`、`hyperframes-cli`、`hyperframes-creative` 和 `remotion-to-hyperframes` 修正了上游失效的路径、旧命名或命令示例，`media-use` 因音频再分发信息不足删除了上游 SFX 文件，五者标记为改编；
 - `guizang-ppt-skill` 保留在 MIT 提交 `6bfa520`：最新稳定 tag 比它更旧，最新 HEAD 只增加赞助信息并改为 AGPL-3.0，没有功能修复。其内置 `motion@11.11.17` 另按 [Motion MIT 许可证](./licenses/motion-11.11.17-LICENSE.md) 分发；
+- `content-repurposing-pipeline` 由本机 OpenClaw Skill Workshop 创建并在工作区内继续优化；源目录没有 Git 远程、tag、LICENSE 或 NOTICE，本仓库保存 2026-07-16 的已验证快照；
 - `windows-c-drive-cleanup` 是本机协作创建的自建 Skill，没有第三方上游；
 - `agently-mail` 的来源可以确认，但其 Skill 文件未声明许可证；在许可证确认前，不应假定拥有公开再分发权；
 - 本仓库当前没有统一的根许可证，不会覆盖第三方内容各自的条款。
