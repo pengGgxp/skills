@@ -1,0 +1,4 @@
+interface:
+  display_name: "GPT Image 2 API Generator"
+  short_description: "Generate images through the GPT Image 2 API"
+  default_prompt: "Use $image2-api-generator to generate an image from my prompt and save it locally."
