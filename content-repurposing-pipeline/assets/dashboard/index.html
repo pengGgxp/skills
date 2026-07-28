@@ -1,0 +1,1731 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Content Hub · 内容进度</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f6f7f4;
+      --surface: #fbfcf9;
+      --surface-strong: #eef1ec;
+      --ink: #20231f;
+      --muted: #666d65;
+      --faint: #8b918a;
+      --line: #d8ddd6;
+      --line-strong: #bcc4bb;
+      --green: #2f6950;
+      --green-soft: #dfece4;
+      --blue: #315f86;
+      --blue-soft: #e2ebf2;
+      --amber: #8a5b17;
+      --amber-soft: #f5e9ce;
+      --red: #91443d;
+      --red-soft: #f3dfdc;
+      --gray-soft: #e8ebe7;
+      --radius: 6px;
+      --shadow: 0 10px 28px rgba(40, 47, 39, 0.06);
+      --font-body: "Source Han Sans CN", "Microsoft YaHei UI", "Segoe UI", sans-serif;
+      --font-display: "Iowan Old Style", "STSong", "Songti SC", serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-width: 320px;
+      background: var(--paper);
+      scroll-behavior: smooth;
+    }
+
+    html.review-modal-open {
+      overflow: hidden;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      overflow-x: hidden;
+      overflow-y: auto;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: var(--font-body);
+      font-size: 15px;
+      line-height: 1.55;
+      letter-spacing: 0;
+    }
+
+    button,
+    input {
+      font: inherit;
+      letter-spacing: 0;
+    }
+
+    button,
+    a,
+    input {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    .skip-link {
+      position: fixed;
+      top: 8px;
+      left: 8px;
+      z-index: 20;
+      padding: 8px 12px;
+      transform: translateY(-150%);
+      border-radius: 4px;
+      color: var(--surface);
+      background: var(--ink);
+    }
+
+    .skip-link:focus {
+      transform: translateY(0);
+    }
+
+    .topbar {
+      border-bottom: 1px solid var(--line);
+      background: rgba(246, 247, 244, 0.96);
+    }
+
+    .topbar-inner,
+    .main-inner {
+      width: min(1480px, calc(100% - 48px));
+      margin: 0 auto;
+    }
+
+    .topbar-inner {
+      display: flex;
+      min-height: 72px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .brand {
+      display: flex;
+      min-width: 0;
+      align-items: baseline;
+      gap: 12px;
+    }
+
+    .brand-name {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: 23px;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .brand-context {
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .sync-state {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .sync-dot {
+      width: 8px;
+      height: 8px;
+      flex: 0 0 auto;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 0 3px var(--green-soft);
+    }
+
+    .summary-band {
+      border-bottom: 1px solid var(--line);
+      background: var(--surface);
+    }
+
+    .summary-grid {
+      display: grid;
+      width: min(1480px, calc(100% - 48px));
+      margin: 0 auto;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .metric {
+      min-width: 0;
+      padding: 20px 24px 18px;
+      border-left: 1px solid var(--line);
+    }
+
+    .metric:last-child {
+      border-right: 1px solid var(--line);
+    }
+
+    .metric-value {
+      display: block;
+      font-family: var(--font-display);
+      font-size: 30px;
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .metric-label {
+      display: block;
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    main {
+      min-height: 60vh;
+    }
+
+    .main-inner {
+      padding: 34px 0 64px;
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 18px;
+    }
+
+    .section-heading h2 {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: 25px;
+      line-height: 1.2;
+    }
+
+    .section-heading p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .result-count {
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .search {
+      position: relative;
+      width: min(360px, 100%);
+    }
+
+    .search input {
+      width: 100%;
+      height: 40px;
+      padding: 0 14px;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius);
+      outline: none;
+      color: var(--ink);
+      background: var(--surface);
+    }
+
+    .search input::placeholder {
+      color: var(--faint);
+    }
+
+    .search input:focus-visible {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px var(--blue-soft);
+    }
+
+    .segments {
+      display: inline-flex;
+      max-width: 100%;
+      padding: 3px;
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface-strong);
+      scrollbar-width: thin;
+    }
+
+    .segment {
+      min-height: 32px;
+      padding: 5px 12px;
+      border: 0;
+      border-radius: 4px;
+      color: var(--muted);
+      background: transparent;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .segment:hover {
+      color: var(--ink);
+    }
+
+    .segment[aria-pressed="true"] {
+      color: var(--ink);
+      background: var(--surface);
+      box-shadow: 0 1px 4px rgba(35, 43, 34, 0.12);
+    }
+
+    .segment:focus-visible,
+    .title-link:focus-visible,
+    .published-link:focus-visible,
+    .review-toggle:focus-visible,
+    .review-tab:focus-visible,
+    .review-close:focus-visible {
+      outline: 3px solid var(--blue);
+      outline-offset: 2px;
+    }
+
+    .board {
+      overflow-x: auto;
+      overflow-y: visible;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .board-header,
+    .article-row {
+      display: grid;
+      min-width: 1050px;
+      grid-template-columns: minmax(300px, 1.5fr) 150px minmax(220px, 1fr) minmax(280px, 1.2fr) 130px;
+      column-gap: 20px;
+    }
+
+    .board-header {
+      align-items: center;
+      min-height: 45px;
+      padding: 0 20px;
+      border-bottom: 1px solid var(--line);
+      color: var(--muted);
+      background: var(--surface-strong);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .article-row {
+      position: relative;
+      align-items: start;
+      padding: 20px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .article-row:last-child {
+      border-bottom: 0;
+    }
+
+    .article-row:hover {
+      background: #f8faf6;
+    }
+
+    .title-link,
+    .article-title {
+      display: inline;
+      margin: 0;
+      color: var(--ink);
+      font-family: var(--font-display);
+      font-size: 17px;
+      font-weight: 700;
+      line-height: 1.4;
+      text-decoration: none;
+    }
+
+    .title-link:hover {
+      color: var(--blue);
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 3px;
+    }
+
+    .article-id,
+    .path {
+      display: block;
+      margin-top: 7px;
+      overflow: hidden;
+      color: var(--faint);
+      font-family: "Cascadia Mono", "Microsoft YaHei UI", monospace;
+      font-size: 11px;
+      line-height: 1.45;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .status {
+      display: inline-flex;
+      min-height: 26px;
+      align-items: center;
+      gap: 7px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1.4;
+      white-space: nowrap;
+    }
+
+    .status::before {
+      width: 7px;
+      height: 7px;
+      flex: 0 0 auto;
+      border-radius: 50%;
+      background: currentColor;
+      content: "";
+    }
+
+    .status-review {
+      color: var(--amber);
+      background: var(--amber-soft);
+    }
+
+    .status-active {
+      color: var(--blue);
+      background: var(--blue-soft);
+    }
+
+    .status-published {
+      color: var(--green);
+      background: var(--green-soft);
+    }
+
+    .status-paused,
+    .status-archived {
+      color: var(--muted);
+      background: var(--gray-soft);
+    }
+
+    .platform-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .platform {
+      display: inline-flex;
+      min-height: 25px;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 8px;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      color: var(--muted);
+      background: var(--surface);
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    .platform-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--faint);
+    }
+
+    .platform[data-status="published"] .platform-dot {
+      background: var(--green);
+    }
+
+    .platform[data-status="awaiting_review"] .platform-dot {
+      background: var(--amber);
+    }
+
+    .platform[data-status="drafting"] .platform-dot {
+      background: var(--blue);
+    }
+
+    .task {
+      margin: 0;
+      color: var(--ink);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .blocker {
+      margin: 8px 0 0;
+      color: var(--red);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .qa-line {
+      display: block;
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .date {
+      color: var(--muted);
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .published-link {
+      display: inline-block;
+      margin-top: 8px;
+      color: var(--blue);
+      font-size: 11px;
+      text-decoration: none;
+    }
+
+    .published-link:hover {
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .review-toggle {
+      display: inline-flex;
+      min-height: 34px;
+      align-items: center;
+      margin-top: 12px;
+      padding: 6px 10px;
+      border: 1px solid var(--line-strong);
+      border-radius: 4px;
+      color: var(--blue);
+      background: transparent;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1.35;
+    }
+
+    .review-toggle:hover {
+      color: var(--ink);
+      background: var(--blue-soft);
+    }
+
+    .review-dialog {
+      width: min(1120px, calc(100vw - 40px));
+      height: min(900px, calc(100dvh - 40px));
+      max-width: none;
+      max-height: none;
+      margin: auto;
+      padding: 0;
+      overflow: hidden;
+      border: 0;
+      border-radius: var(--radius);
+      color: var(--ink);
+      background: var(--surface);
+      box-shadow: 0 24px 72px rgba(32, 35, 31, 0.22);
+    }
+
+    .review-dialog::backdrop {
+      background: rgba(32, 35, 31, 0.48);
+    }
+
+    .review-dialog-shell {
+      display: flex;
+      height: 100%;
+      min-height: 0;
+      flex-direction: column;
+    }
+
+    .reader-heading {
+      display: flex;
+      flex: 0 0 auto;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 18px 22px 16px;
+      border-bottom: 1px solid var(--line);
+      background: var(--surface);
+    }
+
+    .reader-heading-copy {
+      min-width: 0;
+    }
+
+    .reader-kicker {
+      display: block;
+      margin-bottom: 3px;
+      color: var(--amber);
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .reader-title {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: 20px;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+
+    .reader-title:focus {
+      outline: none;
+    }
+
+    .review-close {
+      display: inline-grid;
+      width: 40px;
+      height: 40px;
+      flex: 0 0 auto;
+      place-items: center;
+      padding: 0;
+      border: 0;
+      border-radius: 4px;
+      color: var(--muted);
+      background: transparent;
+      cursor: pointer;
+      font-size: 28px;
+      font-weight: 300;
+      line-height: 1;
+    }
+
+    .review-close:hover {
+      color: var(--ink);
+      background: var(--surface-strong);
+    }
+
+    .reader-toolbar {
+      flex: 0 0 auto;
+      padding: 12px 22px 14px;
+      border-bottom: 1px solid var(--line);
+      background: var(--surface-strong);
+    }
+
+    .reader-tabs {
+      display: flex;
+      gap: 6px;
+      margin: 0 0 10px;
+      padding-bottom: 3px;
+      overflow-x: auto;
+      scrollbar-width: thin;
+    }
+
+    .review-tab {
+      min-height: 36px;
+      padding: 7px 12px;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      color: var(--muted);
+      background: transparent;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .review-tab:hover {
+      color: var(--ink);
+      border-color: var(--line-strong);
+    }
+
+    .review-tab[aria-selected="true"] {
+      color: var(--surface);
+      border-color: var(--ink);
+      background: var(--ink);
+    }
+
+    .reader-meta {
+      display: flex;
+      min-width: 0;
+      flex-wrap: wrap;
+      gap: 5px 14px;
+      color: var(--faint);
+      font-size: 11px;
+    }
+
+    .reader-path {
+      min-width: 0;
+      overflow-wrap: anywhere;
+      font-family: "Cascadia Mono", "Microsoft YaHei UI", monospace;
+    }
+
+    .reader-scroll {
+      min-height: 0;
+      flex: 1 1 auto;
+      overflow-x: hidden;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      scrollbar-gutter: stable;
+    }
+
+    .reader-scroll:focus-visible {
+      outline: 3px solid var(--blue);
+      outline-offset: -4px;
+    }
+
+    .reader-content {
+      width: min(880px, 100%);
+      margin: 0 auto;
+      padding: clamp(30px, 4vw, 52px) clamp(20px, 5vw, 60px) 72px;
+    }
+
+    .reader-content .state-message {
+      padding: 34px 0;
+      text-align: left;
+    }
+
+    .markdown-body {
+      color: #292d28;
+      font-size: 16px;
+      line-height: 1.8;
+      overflow-wrap: anywhere;
+    }
+
+    .markdown-body h1,
+    .markdown-body h2,
+    .markdown-body h3,
+    .markdown-body h4,
+    .markdown-body h5,
+    .markdown-body h6 {
+      margin: 1.8em 0 0.65em;
+      color: var(--ink);
+      font-family: var(--font-display);
+      line-height: 1.35;
+    }
+
+    .markdown-body h1:first-child,
+    .markdown-body h2:first-child,
+    .markdown-body h3:first-child {
+      margin-top: 0;
+    }
+
+    .markdown-body h1 {
+      font-size: 29px;
+    }
+
+    .markdown-body h2 {
+      font-size: 23px;
+    }
+
+    .markdown-body h3 {
+      font-size: 19px;
+    }
+
+    .markdown-body h4,
+    .markdown-body h5,
+    .markdown-body h6 {
+      font-size: 16px;
+    }
+
+    .markdown-body p {
+      margin: 0 0 1.1em;
+    }
+
+    .markdown-body ul,
+    .markdown-body ol {
+      margin: 0 0 1.2em;
+      padding-left: 1.45em;
+    }
+
+    .markdown-body li + li {
+      margin-top: 0.38em;
+    }
+
+    .markdown-body blockquote {
+      margin: 1.4em 0;
+      padding: 2px 0 2px 17px;
+      border-left: 3px solid var(--line-strong);
+      color: var(--muted);
+    }
+
+    .markdown-body pre {
+      margin: 1.4em 0;
+      padding: 15px 17px;
+      overflow-x: auto;
+      border-radius: 4px;
+      color: #edf0eb;
+      background: #292d28;
+      font-family: "Cascadia Mono", Consolas, monospace;
+      font-size: 13px;
+      line-height: 1.65;
+      white-space: pre;
+    }
+
+    .markdown-body :not(pre) > code {
+      padding: 2px 5px;
+      border-radius: 3px;
+      color: #6f4310;
+      background: var(--amber-soft);
+      font-family: "Cascadia Mono", Consolas, monospace;
+      font-size: 0.9em;
+    }
+
+    .markdown-body figure {
+      margin: 28px 0;
+    }
+
+    .markdown-body img {
+      display: block;
+      width: auto;
+      max-width: 100%;
+      height: auto;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: var(--surface-strong);
+    }
+
+    .markdown-body figcaption {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .markdown-body a {
+      color: var(--blue);
+      text-decoration-thickness: 1px;
+      text-underline-offset: 3px;
+    }
+
+    .markdown-body hr {
+      margin: 32px 0;
+      border: 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .state-message {
+      padding: 56px 24px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .state-message strong {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--ink);
+      font-family: var(--font-display);
+      font-size: 18px;
+    }
+
+    .footer {
+      padding: 0 0 32px;
+      color: var(--faint);
+      font-size: 11px;
+      text-align: center;
+    }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (max-width: 900px) {
+      .topbar-inner,
+      .main-inner,
+      .summary-grid {
+        width: min(100% - 28px, 1480px);
+      }
+
+      .topbar-inner {
+        min-height: 64px;
+      }
+
+      .brand-context {
+        display: none;
+      }
+
+      .summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .metric:nth-child(2) {
+        border-right: 1px solid var(--line);
+      }
+
+      .metric:nth-child(n + 3) {
+        border-top: 1px solid var(--line);
+      }
+
+      .controls {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .search {
+        width: 100%;
+      }
+
+      .segments {
+        width: 100%;
+      }
+
+      .segment {
+        flex: 1 0 auto;
+      }
+
+      .board {
+        overflow: visible;
+        border: 0;
+        background: transparent;
+        box-shadow: none;
+      }
+
+      .board-header {
+        display: none;
+      }
+
+      .article-row {
+        display: grid;
+        min-width: 0;
+        margin-bottom: 10px;
+        padding: 18px;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px 18px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--surface);
+        box-shadow: 0 5px 16px rgba(40, 47, 39, 0.04);
+      }
+
+      .article-row:last-child {
+        border-bottom: 1px solid var(--line);
+      }
+
+      .article-main,
+      .task-cell {
+        grid-column: 1 / -1;
+      }
+
+      .article-row > div:not(.article-main)::before {
+        display: block;
+        margin-bottom: 6px;
+        color: var(--faint);
+        content: attr(data-label);
+        font-size: 10px;
+        font-weight: 600;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .topbar-inner,
+      .main-inner,
+      .summary-grid {
+        width: min(100% - 20px, 1480px);
+      }
+
+      .topbar-inner {
+        align-items: flex-start;
+        flex-direction: column;
+        justify-content: center;
+        gap: 5px;
+        padding: 12px 0;
+      }
+
+      .sync-state {
+        font-size: 11px;
+      }
+
+      .metric {
+        padding: 16px;
+      }
+
+      .metric-value {
+        font-size: 25px;
+      }
+
+      .main-inner {
+        padding-top: 26px;
+      }
+
+      .section-heading {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .article-row {
+        grid-template-columns: 1fr;
+      }
+
+      .article-main,
+      .task-cell {
+        grid-column: auto;
+      }
+
+      .review-dialog {
+        width: 100vw;
+        height: 100dvh;
+        max-height: 100dvh;
+        margin: 0;
+        border-radius: 0;
+      }
+
+      .reader-heading {
+        gap: 12px;
+        padding: 14px 14px 12px;
+      }
+
+      .reader-title {
+        font-size: 17px;
+      }
+
+      .review-close {
+        width: 44px;
+        height: 44px;
+      }
+
+      .reader-toolbar {
+        padding: 10px 14px 12px;
+      }
+
+      .reader-content {
+        width: 100%;
+        padding: 24px 20px 52px;
+      }
+
+      .markdown-body {
+        font-size: 15px;
+      }
+
+      .markdown-body h1 {
+        font-size: 25px;
+      }
+
+      .markdown-body h2 {
+        font-size: 21px;
+      }
+    }
+
+    @media (pointer: coarse) {
+      .review-toggle,
+      .review-tab,
+      .review-close {
+        min-height: 44px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#content">跳到内容</a>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <h1 class="brand-name">Content Hub</h1>
+        <span class="brand-context">个人内容进度</span>
+      </div>
+      <div class="sync-state" id="sync-state" aria-live="polite">
+        <span class="sync-dot" aria-hidden="true"></span>
+        <span>正在读取状态</span>
+      </div>
+    </div>
+  </header>
+
+  <section class="summary-band" aria-label="内容概览">
+    <div class="summary-grid">
+      <div class="metric">
+        <span class="metric-value" id="metric-active">0</span>
+        <span class="metric-label">正在处理</span>
+      </div>
+      <div class="metric">
+        <span class="metric-value" id="metric-review">0</span>
+        <span class="metric-label">等待审核</span>
+      </div>
+      <div class="metric">
+        <span class="metric-value" id="metric-published">0</span>
+        <span class="metric-label">已经发布</span>
+      </div>
+      <div class="metric">
+        <span class="metric-value" id="metric-blocked">0</span>
+        <span class="metric-label">存在阻塞</span>
+      </div>
+    </div>
+  </section>
+
+  <main id="content">
+    <div class="main-inner">
+      <div class="section-heading">
+        <div>
+          <h2>文章队列</h2>
+          <p>母稿、平台版本和发布结果集中在同一个工作区。</p>
+        </div>
+        <span class="result-count" id="result-count">0 篇</span>
+      </div>
+
+      <div class="controls">
+        <label class="search">
+          <span class="visually-hidden">搜索文章</span>
+          <input id="search" type="search" placeholder="搜索标题或文章 ID" autocomplete="off">
+        </label>
+        <div class="segments" aria-label="状态筛选">
+          <button class="segment" type="button" data-filter="all" aria-pressed="true">全部</button>
+          <button class="segment" type="button" data-filter="active" aria-pressed="false">进行中</button>
+          <button class="segment" type="button" data-filter="review" aria-pressed="false">待审核</button>
+          <button class="segment" type="button" data-filter="published" aria-pressed="false">已发布</button>
+          <button class="segment" type="button" data-filter="paused" aria-pressed="false">已暂停</button>
+        </div>
+      </div>
+
+      <section class="board" aria-label="文章状态列表">
+        <div class="board-header" aria-hidden="true">
+          <span>文章</span>
+          <span>当前阶段</span>
+          <span>平台版本</span>
+          <span>当前事项</span>
+          <span>最后更新</span>
+        </div>
+        <div id="article-list">
+          <div class="state-message">正在载入内容状态</div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <dialog class="review-dialog" id="review-dialog" aria-labelledby="review-dialog-title">
+    <div class="review-dialog-shell">
+      <div class="reader-heading">
+        <div class="reader-heading-copy">
+          <span class="reader-kicker">只读预览</span>
+          <h2 class="reader-title" id="review-dialog-title" tabindex="-1">审核稿</h2>
+        </div>
+        <button class="review-close" type="button" data-review-close aria-label="关闭审核稿">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <div class="reader-toolbar">
+        <div class="reader-tabs" id="review-tabs" role="tablist" aria-label="稿件版本"></div>
+        <div class="reader-meta">
+          <span class="reader-current" id="review-current"></span>
+          <span class="reader-path" id="review-path"></span>
+        </div>
+      </div>
+      <div class="reader-scroll" id="review-scroll" role="region" aria-label="稿件正文" tabindex="0">
+        <div class="reader-content" id="review-panel" role="tabpanel" aria-busy="false"></div>
+      </div>
+    </div>
+  </dialog>
+
+  <footer class="footer">状态由 AI 写入 dashboard/data.json</footer>
+
+  <script>
+    const stageMeta = {
+      idea: { label: "选题中", tone: "active", rank: 2 },
+      drafting_master: { label: "母稿创作", tone: "active", rank: 1 },
+      awaiting_master_review: { label: "母稿待审核", tone: "review", rank: 0 },
+      adapting: { label: "平台稿制作", tone: "active", rank: 1 },
+      awaiting_publish_review: { label: "发布稿待审核", tone: "review", rank: 0 },
+      ready_to_publish: { label: "等待发布", tone: "review", rank: 0 },
+      published: { label: "已发布", tone: "published", rank: 3 },
+      paused: { label: "已暂停", tone: "paused", rank: 4 },
+      archived: { label: "已归档", tone: "archived", rank: 5 }
+    };
+
+    const platformLabels = {
+      blog: "Blog",
+      wechat: "公众号",
+      xiaohongshu: "小红书",
+      zhihu: "知乎",
+      juejin: "掘金",
+      csdn: "CSDN",
+      bilibili: "Bilibili"
+    };
+
+    const platformStatusLabels = {
+      drafting: "制作中",
+      awaiting_review: "待审核",
+      changes_requested: "待返工",
+      approved: "已通过",
+      published: "已发布",
+      skipped: "已跳过"
+    };
+
+    const qaLabels = {
+      passed: "QA 已通过",
+      needs_changes: "QA 待修改",
+      not_run: "QA 未开始",
+      not_recorded: "旧稿未记录"
+    };
+
+    let articles = [];
+    let activeFilter = "all";
+    let openReviewArticleId = "";
+    let openReviewKey = "";
+    let reviewTrigger = null;
+
+    const reviewCache = new Map();
+
+    const articleList = document.querySelector("#article-list");
+    const searchInput = document.querySelector("#search");
+    const resultCount = document.querySelector("#result-count");
+    const reviewDialog = document.querySelector("#review-dialog");
+    const reviewDialogTitle = document.querySelector("#review-dialog-title");
+    const reviewTabs = document.querySelector("#review-tabs");
+    const reviewCurrent = document.querySelector("#review-current");
+    const reviewPath = document.querySelector("#review-path");
+    const reviewPanel = document.querySelector("#review-panel");
+    const reviewScroll = document.querySelector("#review-scroll");
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function formatDate(value) {
+      if (!value) return "未记录";
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return value;
+      return new Intl.DateTimeFormat("zh-CN", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit"
+      }).format(date);
+    }
+
+    function groupForStage(stage) {
+      if (["awaiting_master_review", "awaiting_publish_review", "ready_to_publish"].includes(stage)) return "review";
+      if (stage === "published") return "published";
+      if (["paused", "archived"].includes(stage)) return "paused";
+      return "active";
+    }
+
+    function latestPublishedUrl(article) {
+      return Object.values(article.platforms || {}).find((platform) => platform.url)?.url || "";
+    }
+
+    function platformArticlePath(path) {
+      const normalized = String(path || "").replaceAll("\\", "/").replace(/\/+$/, "");
+      if (!normalized) return "";
+      return normalized.endsWith(".md") ? normalized : `${normalized}/index.md`;
+    }
+
+    function reviewTargets(article) {
+      if (article.stage === "awaiting_master_review" && article.master?.path) {
+        return [{
+          key: "master",
+          label: "母稿",
+          path: article.master.path,
+          revision: article.master.revision,
+          status: article.master.status,
+          pending: true
+        }];
+      }
+
+      if (!["awaiting_publish_review", "ready_to_publish"].includes(article.stage)) return [];
+
+      const targets = Object.entries(article.platforms || {})
+        .filter(([, platform]) => ["awaiting_review", "approved", "changes_requested"].includes(platform.status))
+        .map(([name, platform]) => ({
+          key: `platform:${name}`,
+          label: platformLabels[name] || name,
+          path: platformArticlePath(platform.path),
+          revision: platform.revision,
+          status: platform.status,
+          pending: platform.status === "awaiting_review"
+        }))
+        .filter((target) => target.path)
+        .sort((a, b) => Number(b.pending) - Number(a.pending));
+
+      if (article.master?.path) {
+        targets.push({
+          key: "master-reference",
+          label: "母稿参考",
+          path: article.master.path,
+          revision: article.master.revision,
+          status: article.master.status,
+          pending: false
+        });
+      }
+
+      return targets;
+    }
+
+    function reviewTargetMeta(target) {
+      const status = platformStatusLabels[target.status]
+        || (target.status === "approved" ? "已通过" : target.status)
+        || "未记录";
+      return `${target.label} · revision ${target.revision ?? "未记录"} · ${status}`;
+    }
+
+    function workspaceFileUrl(path) {
+      const normalized = String(path || "").replaceAll("\\", "/").replace(/^\/+/, "");
+      if (!/^(articles|platforms)\//.test(normalized) || normalized.split("/").includes("..")) {
+        throw new Error("稿件路径不在允许的工作区目录内");
+      }
+      const encoded = normalized.split("/").map((part) => encodeURIComponent(part)).join("/");
+      return new URL(`../${encoded}`, window.location.href).href;
+    }
+
+    function safeContentUrl(value, sourceUrl, image = false) {
+      const raw = String(value || "").trim().replace(/^<|>$/g, "");
+      try {
+        const url = new URL(raw, sourceUrl);
+        const allowed = image ? ["http:", "https:"] : ["http:", "https:", "mailto:"];
+        return allowed.includes(url.protocol) ? url.href : "";
+      } catch {
+        return "";
+      }
+    }
+
+    function renderInlineMarkdown(value, sourceUrl) {
+      const tokens = [];
+      const keep = (html) => {
+        const token = `\uE000${tokens.length}\uE001`;
+        tokens.push(html);
+        return token;
+      };
+
+      let text = String(value || "");
+      text = text.replace(/!\[([^\]]*)\]\(([^)\s]+)(?:\s+["'][^"']*["'])?\)/g, (_, alt, path) => {
+        const url = safeContentUrl(path, sourceUrl, true);
+        if (!url) return alt;
+        return keep(`<img src="${escapeHtml(url)}" alt="${escapeHtml(alt)}" loading="lazy">`);
+      });
+      text = text.replace(/\[([^\]]+)\]\(([^)\s]+)(?:\s+["'][^"']*["'])?\)/g, (_, label, path) => {
+        const url = safeContentUrl(path, sourceUrl);
+        if (!url) return label;
+        return keep(`<a href="${escapeHtml(url)}" target="_blank" rel="noreferrer">${escapeHtml(label)}</a>`);
+      });
+      text = text.replace(/<((?:https?):\/\/[^>]+)>/g, (_, path) => {
+        const url = safeContentUrl(path, sourceUrl);
+        return url ? keep(`<a href="${escapeHtml(url)}" target="_blank" rel="noreferrer">${escapeHtml(path)}</a>`) : path;
+      });
+      text = text.replace(/`([^`\n]+)`/g, (_, code) => keep(`<code>${escapeHtml(code)}</code>`));
+
+      let html = escapeHtml(text)
+        .replace(/\*\*([^*\n]+)\*\*/g, "<strong>$1</strong>")
+        .replace(/__([^_\n]+)__/g, "<strong>$1</strong>")
+        .replace(/(^|[\s（(])\*([^*\n]+)\*/g, "$1<em>$2</em>");
+
+      tokens.forEach((token, index) => {
+        html = html.replaceAll(`\uE000${index}\uE001`, token);
+      });
+      return html;
+    }
+
+    function renderFigure(alt, path, sourceUrl) {
+      const url = safeContentUrl(path, sourceUrl, true);
+      if (!url) return `<p>${escapeHtml(alt)}</p>`;
+      const caption = alt ? `<figcaption>${escapeHtml(alt)}</figcaption>` : "";
+      return `<figure><img src="${escapeHtml(url)}" alt="${escapeHtml(alt)}" loading="lazy">${caption}</figure>`;
+    }
+
+    function renderMarkdown(markdown, sourceUrl) {
+      let text = String(markdown || "").replaceAll("\r\n", "\n");
+      const frontmatter = text.match(/^---\n[\s\S]*?\n---\n?/);
+      if (frontmatter) text = text.slice(frontmatter[0].length);
+
+      const lines = text.split("\n");
+      const output = [];
+      let paragraph = [];
+      let listType = "";
+      let listItems = [];
+      let quoteLines = [];
+      let inCode = false;
+      let codeLines = [];
+
+      const flushParagraph = () => {
+        if (!paragraph.length) return;
+        output.push(`<p>${renderInlineMarkdown(paragraph.join(" "), sourceUrl)}</p>`);
+        paragraph = [];
+      };
+      const flushList = () => {
+        if (!listItems.length) return;
+        output.push(`<${listType}>${listItems.map((item) => `<li>${renderInlineMarkdown(item, sourceUrl)}</li>`).join("")}</${listType}>`);
+        listType = "";
+        listItems = [];
+      };
+      const flushQuote = () => {
+        if (!quoteLines.length) return;
+        output.push(`<blockquote>${renderInlineMarkdown(quoteLines.join(" "), sourceUrl)}</blockquote>`);
+        quoteLines = [];
+      };
+      const flushBlocks = () => {
+        flushParagraph();
+        flushList();
+        flushQuote();
+      };
+
+      for (const line of lines) {
+        const fence = line.match(/^```\s*([\w-]*)\s*$/);
+        if (fence) {
+          if (inCode) {
+            output.push(`<pre><code>${escapeHtml(codeLines.join("\n"))}</code></pre>`);
+            codeLines = [];
+            inCode = false;
+          } else {
+            flushBlocks();
+            inCode = true;
+          }
+          continue;
+        }
+        if (inCode) {
+          codeLines.push(line);
+          continue;
+        }
+        if (!line.trim()) {
+          flushBlocks();
+          continue;
+        }
+
+        const heading = line.match(/^(#{1,6})\s+(.+)$/);
+        if (heading) {
+          flushBlocks();
+          const level = heading[1].length;
+          output.push(`<h${level}>${renderInlineMarkdown(heading[2], sourceUrl)}</h${level}>`);
+          continue;
+        }
+
+        const image = line.trim().match(/^!\[([^\]]*)\]\(([^)\s]+)(?:\s+["'][^"']*["'])?\)$/);
+        if (image) {
+          flushBlocks();
+          output.push(renderFigure(image[1], image[2], sourceUrl));
+          continue;
+        }
+
+        if (/^\s*(?:---+|___+|\*\*\*+)\s*$/.test(line)) {
+          flushBlocks();
+          output.push("<hr>");
+          continue;
+        }
+
+        const quote = line.match(/^>\s?(.*)$/);
+        if (quote) {
+          flushParagraph();
+          flushList();
+          quoteLines.push(quote[1]);
+          continue;
+        }
+
+        const unordered = line.match(/^\s*[-*+]\s+(.+)$/);
+        const ordered = line.match(/^\s*\d+\.\s+(.+)$/);
+        if (unordered || ordered) {
+          flushParagraph();
+          flushQuote();
+          const nextType = ordered ? "ol" : "ul";
+          if (listType && listType !== nextType) flushList();
+          listType = nextType;
+          listItems.push((ordered || unordered)[1]);
+          continue;
+        }
+
+        flushList();
+        flushQuote();
+        paragraph.push(line.trim());
+      }
+
+      if (inCode) output.push(`<pre><code>${escapeHtml(codeLines.join("\n"))}</code></pre>`);
+      flushBlocks();
+      return output.join("\n");
+    }
+
+    function renderReviewToggle(article, targets) {
+      if (!targets.length) return "";
+      const pendingCount = targets.filter((target) => target.pending).length;
+      const closedLabel = article.stage === "awaiting_master_review"
+        ? "查看待审核母稿"
+        : `查看待审核稿（${pendingCount || targets.length}）`;
+      return `
+        <button
+          class="review-toggle"
+          type="button"
+          data-review-toggle="${escapeHtml(article.article_id)}"
+          aria-haspopup="dialog"
+          aria-controls="review-dialog"
+        >${closedLabel}</button>
+      `;
+    }
+
+    function populateReviewDialog(article, targets) {
+      const target = targets.find((item) => item.key === openReviewKey) || targets[0];
+      openReviewKey = target.key;
+      const cached = reviewCache.get(target.path);
+      reviewDialogTitle.textContent = article.title;
+      reviewTabs.innerHTML = targets.map((item, index) => `
+        <button
+          class="review-tab"
+          id="review-tab-${index}"
+          type="button"
+          role="tab"
+          data-review-article="${escapeHtml(article.article_id)}"
+          data-review-key="${escapeHtml(item.key)}"
+          aria-selected="${String(item.key === target.key)}"
+          aria-controls="review-panel"
+          tabindex="${item.key === target.key ? "0" : "-1"}"
+        >${escapeHtml(item.label)}</button>
+      `).join("");
+      const selectedTab = reviewTabs.querySelector('[aria-selected="true"]');
+      reviewPanel.setAttribute("aria-labelledby", selectedTab?.id || "review-dialog-title");
+      reviewCurrent.textContent = reviewTargetMeta(target);
+      reviewPath.textContent = target.path;
+      reviewPanel.setAttribute("aria-busy", String(!cached));
+      reviewPanel.innerHTML = cached
+        ? `<div class="markdown-body">${cached.html}</div>`
+        : '<div class="state-message"><strong>正在读取稿件</strong></div>';
+      reviewScroll.scrollTop = 0;
+    }
+
+    function openReviewDialog(articleId, trigger) {
+      const article = articles.find((item) => item.article_id === articleId);
+      const targets = reviewTargets(article || {});
+      if (!article || !targets.length) return;
+
+      openReviewArticleId = articleId;
+      openReviewKey = targets[0].key;
+      reviewTrigger = trigger;
+      populateReviewDialog(article, targets);
+      document.documentElement.classList.add("review-modal-open");
+      reviewDialog.showModal();
+      requestAnimationFrame(() => reviewDialogTitle.focus());
+      loadReviewTarget(articleId, openReviewKey);
+    }
+
+    function closeReviewDialog() {
+      if (reviewDialog.open) reviewDialog.close();
+    }
+
+    async function loadReviewTarget(articleId, targetKey) {
+      const article = articles.find((item) => item.article_id === articleId);
+      const target = reviewTargets(article || {}).find((item) => item.key === targetKey);
+      if (!article || !target || !reviewDialog.open) return;
+
+      const cached = reviewCache.get(target.path);
+      if (cached) {
+        reviewPanel.innerHTML = `<div class="markdown-body">${cached.html}</div>`;
+        reviewPanel.setAttribute("aria-busy", "false");
+        return;
+      }
+
+      reviewPanel.setAttribute("aria-busy", "true");
+      reviewPanel.innerHTML = '<div class="state-message"><strong>正在读取稿件</strong></div>';
+
+      try {
+        const sourceUrl = workspaceFileUrl(target.path);
+        const response = await fetch(sourceUrl, { cache: "no-store" });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const markdown = await response.text();
+        const html = renderMarkdown(markdown, sourceUrl);
+        reviewCache.set(target.path, { html });
+
+        if (!reviewDialog.open || openReviewArticleId !== articleId || openReviewKey !== targetKey) return;
+        reviewPanel.innerHTML = `<div class="markdown-body">${html}</div>`;
+        reviewPanel.setAttribute("aria-busy", "false");
+      } catch (error) {
+        if (!reviewDialog.open || openReviewArticleId !== articleId || openReviewKey !== targetKey) return;
+        reviewPanel.innerHTML = `
+          <div class="state-message">
+            <strong>无法读取稿件</strong>
+            ${escapeHtml(error.message)}。请运行 Skill 自带的 serve_dashboard.py 并打开 /dashboard/。
+          </div>
+        `;
+        reviewPanel.setAttribute("aria-busy", "false");
+      }
+    }
+
+    function renderPlatforms(article) {
+      const entries = Object.entries(article.platforms || {});
+      if (!entries.length) return '<span class="path">尚未选择平台</span>';
+      return `<div class="platform-list">${entries.map(([name, platform]) => `
+        <span class="platform" data-status="${escapeHtml(platform.status)}" title="${escapeHtml(platform.path)}">
+          <span class="platform-dot" aria-hidden="true"></span>
+          ${escapeHtml(platformLabels[name] || name)} · ${escapeHtml(platformStatusLabels[platform.status] || platform.status)}
+        </span>
+      `).join("")}</div>`;
+    }
+
+    function renderRow(article) {
+      const meta = stageMeta[article.stage] || { label: article.stage, tone: "paused", rank: 9 };
+      const publishedUrl = latestPublishedUrl(article);
+      const targets = reviewTargets(article);
+      const title = escapeHtml(article.title);
+      const titleMarkup = publishedUrl
+        ? `<a class="title-link" href="${escapeHtml(publishedUrl)}" target="_blank" rel="noreferrer">${title}</a>`
+        : `<h3 class="article-title">${title}</h3>`;
+      const blockers = (article.blockers || []).map((item) => `<p class="blocker">阻塞：${escapeHtml(item)}</p>`).join("");
+      const qaText = qaLabels[article.qa?.master] || article.qa?.master || "未记录";
+      const masterPath = article.master?.path || "未迁入母稿";
+
+      return `
+        <article class="article-row">
+          <div class="article-main">
+            ${titleMarkup}
+            <span class="article-id">${escapeHtml(article.article_id)}</span>
+            <span class="path" title="${escapeHtml(masterPath)}">${escapeHtml(masterPath)}</span>
+            ${renderReviewToggle(article, targets)}
+          </div>
+          <div data-label="当前阶段">
+            <span class="status status-${escapeHtml(meta.tone)}">${escapeHtml(meta.label)}</span>
+            <span class="qa-line">${escapeHtml(qaText)}</span>
+          </div>
+          <div data-label="平台版本">
+            ${renderPlatforms(article)}
+          </div>
+          <div class="task-cell" data-label="当前事项">
+            <p class="task">${escapeHtml(article.current_task || "暂无")}</p>
+            ${blockers}
+            ${publishedUrl ? `<a class="published-link" href="${escapeHtml(publishedUrl)}" target="_blank" rel="noreferrer">查看已发布版本</a>` : ""}
+          </div>
+          <div data-label="最后更新">
+            <time class="date" datetime="${escapeHtml(article.updated_at)}">${escapeHtml(formatDate(article.updated_at))}</time>
+          </div>
+        </article>
+      `;
+    }
+
+    function updateSummary() {
+      const active = articles.filter((article) => groupForStage(article.stage) === "active").length;
+      const review = articles.filter((article) => groupForStage(article.stage) === "review").length;
+      const published = articles.filter((article) => article.stage === "published").length;
+      const blocked = articles.filter((article) => (article.blockers || []).length > 0).length;
+      document.querySelector("#metric-active").textContent = active;
+      document.querySelector("#metric-review").textContent = review;
+      document.querySelector("#metric-published").textContent = published;
+      document.querySelector("#metric-blocked").textContent = blocked;
+    }
+
+    function render() {
+      const query = searchInput.value.trim().toLocaleLowerCase("zh-CN");
+      const filtered = articles
+        .filter((article) => activeFilter === "all" || groupForStage(article.stage) === activeFilter)
+        .filter((article) => `${article.title} ${article.article_id}`.toLocaleLowerCase("zh-CN").includes(query))
+        .sort((a, b) => {
+          const rank = (stageMeta[a.stage]?.rank ?? 9) - (stageMeta[b.stage]?.rank ?? 9);
+          return rank || new Date(b.updated_at || 0) - new Date(a.updated_at || 0);
+        });
+
+      resultCount.textContent = `${filtered.length} 篇`;
+      articleList.innerHTML = filtered.length
+        ? filtered.map(renderRow).join("")
+        : '<div class="state-message"><strong>没有匹配内容</strong>换一个标题、文章 ID 或状态试试。</div>';
+    }
+
+    articleList.addEventListener("click", (event) => {
+      const toggle = event.target.closest("[data-review-toggle]");
+      if (toggle) {
+        openReviewDialog(toggle.dataset.reviewToggle, toggle);
+        return;
+      }
+    });
+
+    reviewDialog.addEventListener("click", (event) => {
+      if (event.target === reviewDialog) {
+        closeReviewDialog();
+        return;
+      }
+      if (event.target.closest("[data-review-close]")) {
+        closeReviewDialog();
+        return;
+      }
+      const tab = event.target.closest("[data-review-key]");
+      if (!tab) return;
+      const articleId = tab.dataset.reviewArticle;
+      const targetKey = tab.dataset.reviewKey;
+      const article = articles.find((item) => item.article_id === articleId);
+      const target = reviewTargets(article || {}).find((item) => item.key === targetKey);
+      if (!target) return;
+
+      openReviewArticleId = articleId;
+      openReviewKey = targetKey;
+      reviewTabs.querySelectorAll("[role='tab']").forEach((item) => {
+        const selected = item === tab;
+        item.setAttribute("aria-selected", String(selected));
+        item.setAttribute("tabindex", selected ? "0" : "-1");
+      });
+      reviewPanel.setAttribute("aria-labelledby", tab.id);
+      reviewCurrent.textContent = reviewTargetMeta(target);
+      reviewPath.textContent = target.path;
+      reviewScroll.scrollTop = 0;
+      loadReviewTarget(articleId, targetKey);
+    });
+
+    reviewDialog.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeReviewDialog();
+        return;
+      }
+      const tab = event.target.closest("[role='tab']");
+      if (!tab || !["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+      const tabs = Array.from(tab.parentElement.querySelectorAll("[role='tab']"));
+      const index = tabs.indexOf(tab);
+      if (index < 0) return;
+      event.preventDefault();
+      let next = index;
+      if (event.key === "ArrowLeft") next = (index - 1 + tabs.length) % tabs.length;
+      if (event.key === "ArrowRight") next = (index + 1) % tabs.length;
+      if (event.key === "Home") next = 0;
+      if (event.key === "End") next = tabs.length - 1;
+      tabs[next].focus();
+      tabs[next].click();
+    });
+
+    reviewDialog.addEventListener("close", () => {
+      document.documentElement.classList.remove("review-modal-open");
+      openReviewArticleId = "";
+      openReviewKey = "";
+      if (reviewTrigger?.isConnected) reviewTrigger.focus();
+      reviewTrigger = null;
+    });
+
+    reviewScroll.addEventListener("keydown", (event) => {
+      const pageStep = Math.max(reviewScroll.clientHeight * 0.85, 160);
+      let nextScrollTop = null;
+      if (event.key === "PageDown") nextScrollTop = reviewScroll.scrollTop + pageStep;
+      if (event.key === "PageUp") nextScrollTop = reviewScroll.scrollTop - pageStep;
+      if (event.key === "Home") nextScrollTop = 0;
+      if (event.key === "End") nextScrollTop = reviewScroll.scrollHeight;
+      if (nextScrollTop === null) return;
+      event.preventDefault();
+      reviewScroll.scrollTop = nextScrollTop;
+    });
+
+    document.querySelectorAll(".segment").forEach((button) => {
+      button.addEventListener("click", () => {
+        activeFilter = button.dataset.filter;
+        document.querySelectorAll(".segment").forEach((item) => {
+          item.setAttribute("aria-pressed", String(item === button));
+        });
+        render();
+      });
+    });
+
+    searchInput.addEventListener("input", render);
+
+    fetch("./data.json", { cache: "no-store" })
+      .then((response) => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.json();
+      })
+      .then((data) => {
+        articles = Array.isArray(data.articles) ? data.articles : [];
+        document.querySelector("#sync-state span:last-child").textContent = `状态更新于 ${formatDate(data.updated_at)}`;
+        updateSummary();
+        render();
+      })
+      .catch((error) => {
+        document.querySelector("#sync-state span:last-child").textContent = "状态文件读取失败";
+        document.querySelector("#sync-state .sync-dot").style.background = "var(--red)";
+        articleList.innerHTML = `<div class="state-message"><strong>无法读取 data.json</strong>${escapeHtml(error.message)}</div>`;
+      });
+  </script>
+</body>
+</html>

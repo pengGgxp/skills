@@ -6,3 +6,4 @@ __pycache__/
 .env
 .env.*
 !.env.example
+content-repurposing-pipeline/.content-pipeline.yaml

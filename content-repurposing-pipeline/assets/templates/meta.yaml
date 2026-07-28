@@ -1,0 +1,21 @@
+title: ""
+article_id: "YYYY-MM-DD-slug"
+platform: "blog"
+status: "draft"
+source:
+  canonical_platform: "blog"
+  canonical_path: ""
+  derived_from: ""
+production:
+  machine: ""
+  ai_assistant: ""
+  created_at: ""
+  updated_at: ""
+publishing:
+  url: ""
+  published_at: ""
+  synced_platforms: []
+assets:
+  cover: ""
+  images_dir: "images"
+notes: ""
