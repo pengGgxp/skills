@@ -1,4 +1,4 @@
 interface:
   display_name: "Content Repurposing Pipeline"
-  short_description: "Portable article workspace with visual QA"
-  default_prompt: "Use $content-repurposing-pipeline to turn authorized notes into an illustrated master inside my selected workspace, review it, and adapt approved revisions for selected platforms."
+  short_description: "Article workflow with visual QA and platform profiles"
+  default_prompt: "Use $content-repurposing-pipeline to create an illustrated master in my current content workspace, review it, and adapt approved revisions using the selected platform profiles."

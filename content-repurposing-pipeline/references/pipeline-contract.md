@@ -2,7 +2,7 @@
 
 This contract defines the lightweight personal workflow stored in `dashboard/data.json`.
 
-The file paths in this contract are relative to the user-selected content workspace. The Skill directory contains reusable rules, templates, scripts, and dashboard code only; it must never contain the user's articles or workflow state. A workspace may use Git, but Git is optional.
+The file paths in this contract are relative to the active content workspace root. The Skill directory contains reusable rules, templates, scripts, and dashboard code only; it must never contain the user's articles or workflow state. A workspace may use Git, but Git is optional.
 
 ## Source Scope
 
@@ -148,15 +148,17 @@ The bundled static dashboard may fetch and render the exact current Markdown ref
 
 ## Platform Versions
 
-Each selected platform version contains `index.md`, `meta.yaml`, and `images/`. Start new versions from the Skill's `assets/templates/` files. `meta.yaml` stores descriptive and publication metadata only; workflow state stays in JSON.
+Each selected platform version contains `index.md`, `meta.yaml`, and `images/`. Before drafting it, read `references/platforms/common.md` and the exact `references/platforms/<platform>.md` profile. A missing profile blocks that platform version until the Skill defines one. Start new versions from the Skill's `assets/templates/` files. `meta.yaml` stores descriptive and publication metadata only; workflow state stays in JSON.
 
 Do not require an artifact manifest or publication checklist. Platform QA should still confirm:
 
 - body and local images exist;
 - links and commands are correct;
-- title and structure fit the platform;
+- the common contract and exact platform profile are followed intentionally;
+- title, opening, structure, voice, depth, links, visuals, and CTA fit the platform;
 - product claims have an authentic relevant screenshot;
 - selected images are legible and publishable;
+- current platform constraints are verified before publication or recorded as a concrete pre-publication task;
 - metadata and dashboard state agree.
 
 ## Stop Conditions

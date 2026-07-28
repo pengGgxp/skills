@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Serve the bundled read-only dashboard over a configured content workspace."""
+"""Serve the bundled read-only dashboard over the current content workspace."""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import unquote_to_bytes, urlsplit
 
-from pipeline_runtime import ConfigError, DASHBOARD_HTML, resolve_runtime
+from pipeline_runtime import DASHBOARD_HTML, PipelineError, resolve_workspace
 
 
 LOOPBACK_HOSTS = {"127.0.0.1", "localhost"}
@@ -157,8 +157,6 @@ class DashboardHandler(BaseHTTPRequestHandler):
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--workspace", type=Path, help="explicit content workspace")
-    parser.add_argument("--config", type=Path, help="explicit configuration path")
     parser.add_argument("--host", default="127.0.0.1", choices=sorted(LOOPBACK_HOSTS))
     parser.add_argument("--port", type=int, default=4174)
     return parser.parse_args()
@@ -170,15 +168,11 @@ def main() -> int:
         print("Dashboard server failed: port must be between 1 and 65535", file=sys.stderr)
         return 2
     try:
-        settings = resolve_runtime(args.workspace, args.config)
-        if not settings.workspace.is_dir():
-            raise ConfigError(
-                f"content workspace is not a directory: {settings.workspace}"
-            )
+        workspace = resolve_workspace()
         if not DASHBOARD_HTML.is_file():
-            raise ConfigError(f"bundled dashboard is missing: {DASHBOARD_HTML}")
-        server = DashboardServer((args.host, args.port), settings.workspace)
-    except (ConfigError, OSError) as exc:
+            raise PipelineError(f"bundled dashboard is missing: {DASHBOARD_HTML}")
+        server = DashboardServer((args.host, args.port), workspace)
+    except (PipelineError, OSError) as exc:
         print(f"Dashboard server failed: {exc}", file=sys.stderr)
         return 2
 

@@ -12,12 +12,12 @@ from pathlib import Path, PurePosixPath
 from typing import Any
 
 from pipeline_runtime import (
-    ConfigError,
     DASHBOARD_DATA_REL,
     DASHBOARD_HTML,
-    RuntimeSettings,
+    PLATFORM_PROFILES_DIR,
+    PipelineError,
     load_yaml,
-    resolve_runtime,
+    resolve_workspace,
 )
 
 
@@ -68,8 +68,8 @@ META_STATES = {
 
 
 class Validator:
-    def __init__(self, settings: RuntimeSettings) -> None:
-        self.workspace = settings.workspace
+    def __init__(self, workspace: Path) -> None:
+        self.workspace = workspace
         self.errors: list[str] = []
         self.article_count = 0
         self.platform_count = 0
@@ -104,7 +104,60 @@ class Validator:
 
     def validate_workspace(self) -> None:
         if not self.workspace.is_dir():
-            self.error(self.workspace, "configured content workspace is not a directory")
+            self.error(self.workspace, "current content workspace is not a directory")
+        self.validate_platform_profiles()
+
+    def validate_platform_profiles(self) -> None:
+        common_profile = PLATFORM_PROFILES_DIR / "common.md"
+        if not PLATFORM_PROFILES_DIR.is_dir():
+            self.error(PLATFORM_PROFILES_DIR, "bundled platform profiles are missing")
+            return
+        if not common_profile.is_file():
+            self.error(common_profile, "bundled common platform profile is missing")
+        else:
+            try:
+                common_lines = common_profile.read_text(
+                    encoding="utf-8-sig"
+                ).splitlines()
+            except (OSError, UnicodeError) as exc:
+                self.error(common_profile, f"cannot read common platform profile: {exc}")
+            else:
+                for section in (
+                    "## Load And Route",
+                    "## Preserve Source Truth",
+                    "## Visual Contract",
+                    "## Volatile Platform Constraints",
+                    "## Platform QA",
+                ):
+                    if section not in common_lines:
+                        self.error(common_profile, f"missing required section {section!r}")
+
+        profiles = sorted(
+            path for path in PLATFORM_PROFILES_DIR.glob("*.md") if path != common_profile
+        )
+        if not profiles:
+            self.error(PLATFORM_PROFILES_DIR, "no platform-specific profiles found")
+        for profile_path in profiles:
+            platform_name = profile_path.stem
+            if not ARTICLE_ID_RE.fullmatch(platform_name):
+                self.error(profile_path, "profile filename must be a lowercase ASCII ID")
+            try:
+                profile_lines = profile_path.read_text(
+                    encoding="utf-8-sig"
+                ).splitlines()
+            except (OSError, UnicodeError) as exc:
+                self.error(profile_path, f"cannot read platform profile: {exc}")
+                continue
+            marker = f"Platform ID: `{platform_name}`"
+            if marker not in profile_lines:
+                self.error(profile_path, f"must declare the exact marker {marker!r}")
+            for section in ("## Position", "## Write", "## Avoid", "## Platform QA"):
+                if section not in profile_lines:
+                    self.error(profile_path, f"missing required section {section!r}")
+            if not {"## Visuals", "## Visuals And Production"}.intersection(
+                profile_lines
+            ):
+                self.error(profile_path, "missing required visuals section")
 
     def validate_timestamp(self, value: Any, context: str, *, allow_empty: bool = False) -> None:
         if allow_empty and value in ("", None):
@@ -197,7 +250,7 @@ class Validator:
             return
         try:
             meta = load_yaml(meta_path)
-        except ConfigError as exc:
+        except PipelineError as exc:
             self.error(meta_path, str(exc))
             return
         if not isinstance(meta, dict):
@@ -249,6 +302,12 @@ class Validator:
             self.platform_count += 1
             if not ARTICLE_ID_RE.fullmatch(platform_name):
                 self.error(platform_context, "platform name must be lowercase ASCII")
+            profile_path = PLATFORM_PROFILES_DIR / f"{platform_name}.md"
+            if not profile_path.is_file():
+                self.error(
+                    platform_context,
+                    f"missing bundled platform profile: {profile_path.name}",
+                )
             if not isinstance(platform, dict):
                 self.error(platform_context, "platform state must be a mapping")
                 continue
@@ -479,27 +538,17 @@ class Validator:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "--workspace",
-        type=Path,
-        help="explicit content workspace path",
-    )
-    parser.add_argument(
-        "--config",
-        type=Path,
-        help="explicit content-pipeline configuration path",
-    )
     return parser.parse_args()
 
 
 def main() -> int:
-    args = parse_args()
+    parse_args()
     try:
-        settings = resolve_runtime(args.workspace, args.config)
-    except ConfigError as exc:
-        print(f"Configuration error: {exc}", file=sys.stderr)
+        workspace = resolve_workspace()
+    except (PipelineError, OSError) as exc:
+        print(f"Workspace error: {exc}", file=sys.stderr)
         return 2
-    return Validator(settings).run()
+    return Validator(workspace).run()
 
 
 if __name__ == "__main__":

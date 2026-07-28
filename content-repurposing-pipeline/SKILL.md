@@ -1,23 +1,46 @@
 ---
 name: content-repurposing-pipeline
-description: Turn user-authorized notes, records, incidents, and research into illustrated master articles and platform-specific versions inside a user-selected content workspace, with authentic product screenshots, independent AI review loops, two lightweight human review moments, JSON workflow state, and a bundled read-only dashboard. Use when mining notes for topics, drafting or revising articles, creating or checking article images, adapting content for platforms, publishing approved versions, initializing a portable article workspace, or maintaining the personal content workflow and dashboard.
+description: Turn user-authorized notes, records, incidents, and research into illustrated master articles and platform-specific versions inside the active content workspace, with authentic product screenshots, independent AI review loops, two lightweight human review moments, JSON workflow state, and a bundled read-only dashboard. Use when mining notes for topics, drafting or revising articles, creating or checking article images, adapting content for platforms, publishing approved versions, initializing a portable article workspace, or maintaining the personal content workflow and dashboard.
 ---
 
 # Content Repurposing Pipeline
 
 ## Purpose
 
-Run a practical personal publishing workflow in a user-selected content workspace. The workspace may be an ordinary directory or may use Git, cloud sync, or another backup mechanism; Git is not a runtime requirement. Keep the article, working notes, selected assets, platform versions, publication result, and current state together while keeping reusable code and templates inside this Skill. Use internal AI QA to improve quality, while asking the user for only two decisions: approve the master, then approve each platform version for publication.
+Run a practical personal publishing workflow in the current content workspace. The workspace may be an ordinary directory or may use Git, cloud sync, or another backup mechanism; Git is not a runtime requirement. Keep the article, working notes, selected assets, platform versions, publication result, and current state together while keeping reusable code and templates inside this Skill. Use internal AI QA to improve quality, while asking the user for only two decisions: approve the master, then approve each platform version for publication.
 
 ## Required Context
 
-1. Read `references/runtime-configuration.md` and resolve the user-selected content workspace.
+1. Read `references/workspace-runtime.md` and confirm that the process working directory is the content workspace root.
 2. Read `references/pipeline-contract.md` before creating or changing workflow state.
 3. Read workspace-local instructions such as `AGENTS.md` when they exist.
 4. Read `references/visual-assets-and-agent-review.md` before drafting an illustrated article, handling images, or launching review subagents.
 5. Read `references/dashboard-design.md` only when changing the bundled dashboard interface.
 
-An explicit workspace in the current request takes priority over configuration. If neither an explicit workspace nor a complete configuration exists, stop before reading sources or creating files. Tell the user to create the Skill-local `.content-pipeline.yaml` from `.content-pipeline.example.yaml` and set `content_workspace`.
+Treat the process working directory as the only content workspace. Do not accept workspace flags, read workspace configuration, or search parent and neighboring directories. The AI must set every bundled-script command's working directory to the exact content workspace root. If the active directory is clearly not the intended workspace, stop before reading sources or writing files and ask the user to open the task from the content workspace; do not ask them to configure command-line arguments.
+
+## Platform Profiles
+
+Before creating, revising, or reviewing a platform version, read `references/platforms/common.md` and exactly one selected platform profile. Do not load every profile. If the selected ID has no profile, record a blocker and do not create its version until a profile is added.
+
+| Platform ID | Profile |
+| --- | --- |
+| `blog` | `references/platforms/blog.md` |
+| `wechat` | `references/platforms/wechat.md` |
+| `xiaohongshu` | `references/platforms/xiaohongshu.md` |
+| `zhihu` | `references/platforms/zhihu.md` |
+| `juejin` | `references/platforms/juejin.md` |
+| `csdn` | `references/platforms/csdn.md` |
+| `segmentfault` | `references/platforms/segmentfault.md` |
+| `cnblogs` | `references/platforms/cnblogs.md` |
+| `51cto` | `references/platforms/51cto.md` |
+| `toutiao` | `references/platforms/toutiao.md` |
+| `jianshu` | `references/platforms/jianshu.md` |
+| `yuque` | `references/platforms/yuque.md` |
+| `github` | `references/platforms/github.md` |
+| `bilibili` | `references/platforms/bilibili.md` |
+| `medium` | `references/platforms/medium.md` |
+| `devto` | `references/platforms/devto.md` |
 
 ## Boundaries
 
@@ -60,7 +83,7 @@ scripts/serve_dashboard.py
 scripts/validate_pipeline.py
 ```
 
-Initialize a new ordinary directory with `python -B scripts/init_workspace.py --workspace <path>`. This command never initializes Git and never overwrites an existing state file.
+From a new ordinary directory, initialize the current workspace with `python -B <skill-directory>/scripts/init_workspace.py`. This command never initializes Git and never overwrites an existing state file.
 
 ## Core Workflow
 
@@ -73,9 +96,9 @@ Initialize a new ordinary directory with `python -B scripts/init_workspace.py --
 7. Run one independent master-review subagent by default. Give it the current master, source summary, selected visuals, audience, and a neutral checklist. Revise and rerun until actionable findings are closed or a genuine blocker remains.
 8. Record only the current QA result and blockers in `dashboard/data.json`; do not persist a hierarchy of review files. Set `stage: awaiting_master_review` and ask the user to review the master.
 9. If the user requests changes, increment the master revision after the material edit and return to drafting. If the user approves, record `approved_revision` and the platforms they select, then set `stage: adapting`.
-10. Create only selected platform versions, starting from the bundled files under `assets/templates/`. Adapt structure, voice, length, headings, links, and visuals for each destination rather than cross-posting identical text.
-11. Run a fresh independent platform-review subagent for each materially different platform version. Add a second visual reviewer only when screenshots, web images, visual privacy, or usage rights are genuinely complex.
-12. Close actionable findings, record the current QA result, set the platform to `awaiting_review`, and set the article to `awaiting_publish_review`.
+10. Create only selected platform versions, starting from the bundled files under `assets/templates/`. Read the common contract and the exact platform profile first, then adapt structure, voice, length, headings, links, visuals, and CTA for that destination rather than cross-posting identical text.
+11. Run a fresh independent platform-review subagent for each materially different platform version. Give it the common contract and exact platform profile. Add a second visual reviewer only when screenshots, web images, visual privacy, or usage rights are genuinely complex.
+12. Close actionable findings, verify or record the remaining volatile publishing constraints, record the current QA result, set the platform to `awaiting_review`, and set the article to `awaiting_publish_review`.
 13. If the user requests changes, increment that platform revision and repeat QA. If the user approves, record `approved_revision` and set the platform to `approved`.
 14. Enter `ready_to_publish` only when at least one current platform revision is approved. Approval never triggers publication.
 15. Publish only after the user explicitly requests it. Verify the public result, move the local version to `published/`, update `meta.yaml`, and record the URL, time, path, and accurate final stage in `dashboard/data.json`.
@@ -103,7 +126,7 @@ Initialize a new ordinary directory with `python -B scripts/init_workspace.py --
 - Update `dashboard/data.json` after every material workflow change.
 - Keep paths workspace-relative and use lowercase ASCII IDs and platform names.
 - Let the user open the exact current master or platform Markdown for every pending review item. Fetch those files from their workspace-relative paths; do not copy article bodies into `dashboard/data.json`.
-- Run `python -B scripts/serve_dashboard.py --workspace <path>` and open the printed `/dashboard/` URL. The server exposes only the bundled dashboard, workspace state, and files below `articles/`, `platforms/`, and `shared/`.
+- From the content workspace root, run `python -B <skill-directory>/scripts/serve_dashboard.py` and open the printed `/dashboard/` URL. The server exposes only the bundled dashboard, workspace state, and files below `articles/`, `platforms/`, and `shared/`.
 - Show current state, not a fabricated audit history.
 - The dashboard may be the read-only reading surface, but the user must still state approval, requested changes, rejection, and platform choices in the conversation or another explicitly chosen decision channel.
 
@@ -112,13 +135,13 @@ Initialize a new ordinary directory with `python -B scripts/init_workspace.py --
 Run:
 
 ```text
-python -B scripts/validate_pipeline.py
+python -B <skill-directory>/scripts/validate_pipeline.py
 ```
 
-Pass `--workspace <path>` when the user explicitly selects a workspace. Use `--config <path>` only when the user explicitly selects another configuration. The validator does not require or inspect Git. Fix every validation error before reporting the workflow state complete.
+Run the command with the content workspace root as its working directory. The validator does not accept workspace-selection arguments and does not require or inspect Git. Fix every validation error before reporting the workflow state complete.
 
 For a Guizang cover fallback, render and verify dimensions with:
 
 ```text
-python -B scripts/render_guizang_cover.py --source <cover.html> --output <cover.png> --width <width> --height <height>
+python -B <skill-directory>/scripts/render_guizang_cover.py --source <cover.html> --output <cover.png> --width <width> --height <height>
 ```

@@ -1,4 +1,0 @@
-schema_version: "3.0"
-
-# This may be any user-owned directory. It does not need to be a Git repository.
-content_workspace: ""

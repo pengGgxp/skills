@@ -1,9 +1,9 @@
 title: ""
 article_id: "YYYY-MM-DD-slug"
-platform: "blog"
+platform: "{{platform}}"
 status: "draft"
 source:
-  canonical_platform: "blog"
+  canonical_platform: "{{platform}}"
   canonical_path: ""
   derived_from: ""
 production:
