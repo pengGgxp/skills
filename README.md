@@ -34,7 +34,7 @@ Codex 的 `.system`、插件缓存和 `vendor_imports` 不属于可移植的用�
 
 ## 入口与依赖
 
-- [`content-repurposing-pipeline`](./content-repurposing-pipeline/) 是内容复用工作流的**编排/执行 Skill**。它在当前内容 workspace 中组织母稿、来源、图片、多平台版本和 `dashboard/data.json`，同时由 Skill 自带模板、16 个按需加载的平台写作 profile、只读看板和运行脚本；Git 只是可选同步方式。流程采用“母稿审核、平台稿发布审核”两个人工节点，文章配图按需调用 `image2-api-generator`、`guizang-ppt-skill` 和 `chrome:control-chrome`，内部 QA 使用轻量独立审核子智能体闭环。它不是其他 Skill 的前置依赖。
+- [`content-repurposing-pipeline`](./content-repurposing-pipeline/) 是内容复用工作流的**编排/执行 Skill**。它在当前内容 workspace 中组织母稿、来源、图片、多平台版本和 `dashboard/data.json`，同时由 Skill 自带模板、16 个按需加载的平台写作 profile、只读看板和运行脚本；Git 只是可选同步方式。流程采用“母稿审核、平台稿发布审核”两个人工节点，中文稿件在现有 QA 环节自动路由到 `humanizer-zh-next`，文章配图按需调用 `image2-api-generator`、`guizang-ppt-skill` 和 `chrome:control-chrome`，内部 QA 使用轻量独立审核子智能体闭环。它不是其他 Skill 的前置依赖。
 - [`evidence-first-product-design`](./evidence-first-product-design/) 是本仓库的主要**入口/编排 Skill**。它会根据任务选择少量相关 Skill，但不是使用其他 Skill 前必须调用的前置步骤。
 - [`layers-intro`](./layers-intro/) 是 Layers of Product Design 的**框架入口和真实前置依赖**；使用其他 `layers-*` Skill 前应先加载它。
 - `frontend-design` 会按需引用 `clarify`、`animate` 和 `optimize`，但并不要求每次前端任务都调用这三个 Skill。
@@ -50,7 +50,7 @@ Codex 的 `.system`、插件缓存和 `vendor_imports` 不属于可移植的用�
 
 | Skill | 简介 | 角色 |
 | --- | --- | --- |
-| [`content-repurposing-pipeline`](./content-repurposing-pipeline/) | 在当前内容 workspace 中完成母稿、实机配图、16 个平台 profile 下的多平台版本、独立 QA 和只读状态看板 | 编排/执行 |
+| [`content-repurposing-pipeline`](./content-repurposing-pipeline/) | 在当前内容 workspace 中完成母稿、中文稿件自动人性化、实机配图、16 个平台 profile 下的多平台版本、独立 QA 和只读状态看板 | 编排/执行 |
 | [`evidence-first-product-design`](./evidence-first-product-design/) | 从项目事实和上下文发现出发，按需编排产品策略、概念模型、交互、视觉实现与运行时 QA | 入口/编排 |
 | [`image2-api-generator`](./image2-api-generator/) | 通过配置的 OpenAI 兼容 Images API 和固定的 `gpt-image-2` 模型生成并保存栅格图像 | 生成/执行 |
 | [`windows-c-drive-cleanup`](./windows-c-drive-cleanup/) | 为中文 Windows 初学者安全扫描和清理 C 盘，并给出常见国内应用缓存与习惯修复建议 | 诊断/执行 |
@@ -211,7 +211,7 @@ foreach ($link in $pipelineLinks) {
 
 安装后重新启动或重新加载 Agent。不要只复制 `SKILL.md`；部分 Skill 还依赖同目录下的 `references/`、`scripts/`、`assets/` 或 `agents/`。除 `content-repurposing-pipeline` 明确建立 junction 外，其他复制项会成为普通目录。
 
-`content-repurposing-pipeline` 不需要 workspace 配置。各 Agent junction 共享同一份 Skill 代码；AI 以当前任务的内容 workspace 根目录作为脚本工作目录，不向用户索取 workspace 参数，也不搜索父级或相邻目录。Skill 自带目录初始化、校验和只读看板服务，并按需加载共用约束和精确的平台写作 profile；workspace 不要求是 Git 仓库。运行脚本要求 Python 3.10+ 和 PyYAML；PyYAML 仅用于平台 `meta.yaml` 等内容元数据，不用于选择 workspace。
+`content-repurposing-pipeline` 不需要 workspace 配置。各 Agent junction 共享同一份 Skill 代码；AI 以当前任务的内容 workspace 根目录作为脚本工作目录，不向用户索取 workspace 参数，也不搜索父级或相邻目录。Skill 自带目录初始化、校验和只读看板服务，并按需加载共用约束和精确的平台写作 profile；workspace 不要求是 Git 仓库。中文母稿和中文平台稿会在现有 QA 环节自动调用另行安装的 `humanizer-zh-next`；缺少该依赖时，Skill 使用内置回退清单并保持稿件为非最终状态。运行脚本要求 Python 3.10+ 和 PyYAML；PyYAML 仅用于平台 `meta.yaml` 等内容元数据，不用于选择 workspace。
 
 ## 未收录内容
 
@@ -235,7 +235,7 @@ foreach ($link in $pipelineLinks) {
 - better-web-ui 不是标准 MIT，公开分发时必须同时公开完整对应源码，且不得作为闭源、专有或收费产品分发；
 - HyperFrames Skill 固定在最新稳定版 `v0.7.55` 的 Apache-2.0 提交；`hyperframes-animation`、`hyperframes-cli`、`hyperframes-creative` 和 `remotion-to-hyperframes` 修正了上游失效的路径、旧命名或命令示例，`media-use` 因音频再分发信息不足删除了上游 SFX 文件，五者标记为改编；
 - `guizang-ppt-skill` 保留在 MIT 提交 `6bfa520`：最新稳定 tag 比它更旧，最新 HEAD 只增加赞助信息并改为 AGPL-3.0，没有功能修复。其内置 `motion@11.11.17` 另按 [Motion MIT 许可证](./licenses/motion-11.11.17-LICENSE.md) 分发；
-- `content-repurposing-pipeline` 最初由本机 Skill Workshop 创建，现由本仓库以运行时中立方式维护，可供 Codex、Claude Code、WorkBuddy、OpenClaw 等 Agent 使用；它没有第三方上游、tag、LICENSE 或 NOTICE；
+- `content-repurposing-pipeline` 最初由本机 Skill Workshop 创建，现由本仓库以运行时中立方式维护，可供 Codex、Claude Code、WorkBuddy、OpenClaw 等 Agent 使用；它没有第三方上游、tag、LICENSE 或 NOTICE。其中文人性化流程依赖另行安装的 `humanizer-zh-next`，本仓库不复制该依赖；
 - `image2-api-generator` 是本机协作创建的自建 Skill，没有第三方上游、tag、LICENSE 或 NOTICE；源目录中已配置的 `.env` 未收录，安装后必须在本地单独配置；
 - `windows-c-drive-cleanup` 是本机协作创建的自建 Skill，没有第三方上游；
 - `agently-mail` 的来源可以确认，但其 Skill 文件未声明许可证；在许可证确认前，不应假定拥有公开再分发权；

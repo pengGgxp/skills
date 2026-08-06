@@ -1,4 +1,4 @@
 interface:
   display_name: "Content Repurposing Pipeline"
-  short_description: "Article workflow with visual QA and platform profiles"
+  short_description: "Article workflow with Chinese humanization and visual QA"
   default_prompt: "Use $content-repurposing-pipeline to create an illustrated master in my current content workspace, review it, and adapt approved revisions using the selected platform profiles."

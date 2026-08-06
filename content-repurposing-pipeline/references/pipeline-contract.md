@@ -135,6 +135,8 @@ The revision is a personal workflow aid, not a cryptographic audit claim.
 
 Use one independent review subagent by default at the master stage and a fresh one at the platform stage. Add a separate visual review only when image authenticity, privacy, or rights require specialist attention.
 
+For Chinese prose, the master and platform QA loops automatically include the internal `humanizer-zh-next` pass defined in `humanization-routing.md`; the user does not need to mention this dependency. Treat its result as part of the existing master or platform QA result; do not add another workflow stage, approval gate, or required JSON field. A humanization pass may change wording and structure, but it may not add facts, citations, experiences, claims, or unsupported specificity.
+
 Review agents may recommend changes but may not create human decisions. Resolve actionable findings, rerun the reviewer, and store only the current `qa` result and concise blockers in JSON.
 
 Human activity has two review moments:
