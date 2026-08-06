@@ -1,0 +1,4 @@
+interface:
+  display_name: "文章脊柱编辑"
+  short_description: "重建长文观点脊柱、论证推进、限定条件与真实作者声音"
+  default_prompt: "使用 $edit-article-spine 审查并重建这篇长文的观点脊柱、论证推进和作者声音，同时保留事实边界。"

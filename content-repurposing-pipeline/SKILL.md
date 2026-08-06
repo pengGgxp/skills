@@ -1,23 +1,35 @@
 ---
 name: content-repurposing-pipeline
-description: Turn user-authorized notes, records, incidents, and research into illustrated master articles and platform-specific versions inside the active content workspace, with authentic product screenshots, independent AI review loops, two lightweight human review moments, JSON workflow state, and a bundled read-only dashboard. Use when mining notes for topics, drafting or revising articles, creating or checking article images, adapting content for platforms, publishing approved versions, initializing a portable article workspace, or maintaining the personal content workflow and dashboard.
+description: Research and select differentiated article angles, then turn user-authorized notes, records, incidents, and research into illustrated master articles and platform-specific versions inside the active content workspace, with evidence-safe article-spine editing, authentic product screenshots, lightweight independent AI review, two human review moments, JSON workflow state, and a bundled read-only dashboard. Use when finding or replacing article topics, mining notes for angles, drafting or revising articles, creating or checking article images, adapting content for platforms, publishing approved versions, initializing a portable article workspace, or maintaining the personal content workflow and dashboard.
 ---
 
 # Content Repurposing Pipeline
 
 ## Purpose
 
-Run a practical personal publishing workflow in the current content workspace. The workspace may be an ordinary directory or may use Git, cloud sync, or another backup mechanism; Git is not a runtime requirement. Keep the article, working notes, selected assets, platform versions, publication result, and current state together while keeping reusable code and templates inside this Skill. Use internal AI QA to improve quality, while asking the user for only two decisions: approve the master, then approve each platform version for publication.
+Run a practical personal publishing workflow in the current content workspace. The workspace may be an ordinary directory or may use Git, cloud sync, or another backup mechanism; Git is not a runtime requirement. Keep the article, working notes, selected assets, platform versions, publication result, and current state together while keeping reusable code and templates inside this Skill. For every full master, route one internal editorial pass through `$edit-article-spine` after establishing the factual boundary so defensibility does not replace a clear point of view. The user invokes only this Skill for the full workflow and makes only two review decisions: approve the master, then approve each platform version for publication.
 
 ## Required Context
 
 1. Read `references/workspace-runtime.md` and confirm that the process working directory is the content workspace root.
 2. Read `references/pipeline-contract.md` before creating or changing workflow state.
 3. Read workspace-local instructions such as `AGENTS.md` when they exist.
-4. Read `references/visual-assets-and-agent-review.md` before drafting an illustrated article, handling images, or launching review subagents.
-5. Read `references/dashboard-design.md` only when changing the bundled dashboard interface.
+4. Read `references/topic-selection.md` before open-ended topic research, shortlisting multiple angles, or replacing a weak angle. Do not load it when the user has already fixed and accepted the angle.
+5. Read `references/visual-assets-and-agent-review.md` before drafting an illustrated article, handling images, or launching review subagents.
+6. Before finalizing or materially restructuring a full master, invoke `$edit-article-spine` and follow its mode and evidence-preservation rules. For Chinese master or platform prose, also read `references/humanization-routing.md`; it defines how to use the same editorial pass for natural Chinese rather than scheduling an overlapping rewrite.
+7. Read `references/dashboard-design.md` only when changing the bundled dashboard interface.
 
 Treat the process working directory as the only content workspace. Do not accept workspace flags, read workspace configuration, or search parent and neighboring directories. The AI must set every bundled-script command's working directory to the exact content workspace root. If the active directory is clearly not the intended workspace, stop before reading sources or writing files and ask the user to open the task from the content workspace; do not ask them to configure command-line arguments.
+
+## Automatic Editorial Routing
+
+Keep `$content-repurposing-pipeline` as the single user-facing entry point. Internally invoke `$edit-article-spine`; do not require the user to name the editing dependency.
+
+- For a full master, choose `rebuild` or `targeted` once from the article's actual structural condition.
+- For Chinese prose, follow `references/humanization-routing.md` during that same master pass. Diagnose clustered patterns rather than replacing isolated words.
+- After a material Chinese platform adaptation, use one platform-aware `targeted` pass before platform review. Do not rerun the full master rewrite mechanically.
+- Treat editorial routing as part of existing QA. It creates no workflow stage, approval gate, dashboard field, or persistent editing ledger.
+- If the editing Skill cannot be loaded, use the reference's bounded fallback and independent review. Missing routing machinery alone does not permanently block an otherwise verified draft.
 
 ## Platform Profiles
 
@@ -87,21 +99,24 @@ From a new ordinary directory, initialize the current workspace with `python -B 
 
 ## Core Workflow
 
-1. Confirm the outcome, audience, authorized source scope, likely platforms, and constraints.
-2. Inspect the source material and shortlist useful topics. Explain value, evidence strength, differentiation, visual opportunities, and gaps without manufacturing numeric precision.
-3. Select the requested topic or the strongest supported topic. Create `articles/<article_id>/master.md` and add or update its entry in `dashboard/data.json` with `stage: drafting_master`.
-4. Research material claims within a bounded budget. Prefer official documentation, source code, reproducible tests, and direct evidence. Qualify uncertainty instead of inventing certainty.
-5. Draft the master around the reader's problem, diagnosis, solution, reusable principle, limits, and practical next step.
-6. Plan and produce useful visuals. For a real tool or product, obtain an authentic runtime demonstration that proves the exact feature described. Follow the visual reference.
-7. Run one independent master-review subagent by default. Give it the current master, source summary, selected visuals, audience, and a neutral checklist. Revise and rerun until actionable findings are closed or a genuine blocker remains.
-8. Record only the current QA result and blockers in `dashboard/data.json`; do not persist a hierarchy of review files. Set `stage: awaiting_master_review` and ask the user to review the master.
-9. If the user requests changes, increment the master revision after the material edit and return to drafting. If the user approves, record `approved_revision` and the platforms they select, then set `stage: adapting`.
-10. Create only selected platform versions, starting from the bundled files under `assets/templates/`. Read the common contract and the exact platform profile first, then adapt structure, voice, length, headings, links, visuals, and CTA for that destination rather than cross-posting identical text.
-11. Run a fresh independent platform-review subagent for each materially different platform version. Give it the common contract and exact platform profile. Add a second visual reviewer only when screenshots, web images, visual privacy, or usage rights are genuinely complex.
-12. Close actionable findings, verify or record the remaining volatile publishing constraints, record the current QA result, set the platform to `awaiting_review`, and set the article to `awaiting_publish_review`.
-13. If the user requests changes, increment that platform revision and repeat QA. If the user approves, record `approved_revision` and set the platform to `approved`.
-14. Enter `ready_to_publish` only when at least one current platform revision is approved. Approval never triggers publication.
-15. Publish only after the user explicitly requests it. Verify the public result, move the local version to `published/`, update `meta.yaml`, and record the URL, time, path, and accurate final stage in `dashboard/data.json`.
+1. Confirm whether the outcome prioritizes timely reach, durable search value, authority, or reader action, then confirm the audience, authorized source scope, likely platforms, and constraints.
+2. For topic discovery or replacement, follow `references/topic-selection.md`. Distinguish the broad subject from the publishable angle, inspect the current conversation around it, and generate candidates around concrete reader decisions, tensions, consequences, tests, or visible outcomes.
+3. Shortlist only the strongest supported candidates. Explain each candidate's reader promise, evidence, differentiation, visual proof, timing, production cost, and decisive limitation without manufacturing numeric precision. Include a fast, time-sensitive recommendation and a durable, proof-rich recommendation when both exist.
+4. If the user asks only for topic research, stop after the shortlist. Do not create or rewrite a master, increment a revision, or change `dashboard/data.json`. Treat rejection of an existing angle as a topic decision, not a request for cosmetic retitling.
+5. Once the user selects an angle, or when an end-to-end request authorizes choosing the strongest supported one, create `articles/<article_id>/master.md` and add or update its entry in `dashboard/data.json` with `stage: drafting_master`.
+6. Research material claims within a bounded budget. Prefer official documentation, source code, reproducible tests, and direct evidence. Qualify uncertainty instead of inventing certainty.
+7. Draft the initial master around one arguable point of view and a small sequence of advancing reader questions. Keep the user's chosen angle sharp; do not smooth it into generic balance.
+8. From the verified sources, form a temporary semantic boundary for facts, numbers, quotations, links, legal meaning, and material uncertainty. Invoke `$edit-article-spine` in `rebuild` or `targeted` mode to improve selection, progression, caveat placement, rhythm, and voice. For Chinese prose, use `references/humanization-routing.md` as the input and self-check contract for this same pass; never follow it with a second full-text humanizer. Do not persist paragraph labels or an extra editorial state file.
+9. Plan and produce useful visuals against the edited structure. For a real tool or product, obtain an authentic runtime demonstration that proves the exact feature described. Follow the visual reference.
+10. Run one independent master-review subagent by default. Give it the exact current master, source summary, temporary semantic boundary, selected visuals, audience, and a neutral checklist. Ask it to combine semantic-regression checks with a blind-reader progression check and the normal evidence and visual QA. Revise and rerun until actionable findings are closed or a genuine blocker remains.
+11. Record only the current QA result and blockers in `dashboard/data.json`; do not persist a hierarchy of review files. Set `stage: awaiting_master_review` and ask the user to review the master.
+12. If the user requests changes, increment the master revision after the material edit and return to drafting. If the user approves, record `approved_revision` and the platforms they select, then set `stage: adapting`.
+13. Create only selected platform versions, starting from the bundled files under `assets/templates/`. Read the common contract and the exact platform profile first, then adapt structure, voice, length, headings, links, visuals, and CTA for that destination rather than cross-posting identical text. After a material Chinese adaptation, follow `references/humanization-routing.md` and use `$edit-article-spine` in `targeted` mode on the adapted version.
+14. Run a fresh independent platform-review subagent for each materially different platform version. Give it the common contract, exact platform profile, protected elements, and current adapted version; ask it to check destination fit, factual fidelity, and residual clustered template patterns. Add a second visual reviewer only when screenshots, web images, visual privacy, or usage rights are genuinely complex.
+15. Close actionable findings, verify or record the remaining volatile publishing constraints, record the current QA result, set the platform to `awaiting_review`, and set the article to `awaiting_publish_review`.
+16. If the user requests changes, increment that platform revision and repeat QA. If the user approves, record `approved_revision` and set the platform to `approved`.
+17. Enter `ready_to_publish` only when at least one current platform revision is approved. Approval never triggers publication.
+18. Publish only after the user explicitly requests it. Verify the public result, move the local version to `published/`, update `meta.yaml`, and record the URL, time, path, and accurate final stage in `dashboard/data.json`.
 
 ## Revision Rules
 

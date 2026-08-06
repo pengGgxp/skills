@@ -30,7 +30,7 @@ README 中的“类型”和“角色”是两个不同维度：
 - 只有其他 Skill 在缺少它时无法正确工作，才标记为“前置依赖”，并明确调用顺序；
 - 编排 Skill 如果会调用其他 Skill，应在自身文档中列出选择规则和实际依赖，不要笼统要求每次加载全部 Skill。
 
-当前 `content-repurposing-pipeline` 是运行时中立的编排/执行 Skill。它把进程当前工作目录作为唯一内容 workspace，不接受 workspace 参数，不读取配置文件或环境变量，也不搜索父级和相邻目录；AI 必须把脚本工作目录设为内容 workspace 根目录。Skill 保存文章组织规则、模板、脚本、16 个按需加载的平台 profile 和只读看板代码，用户 workspace 只保存母稿、来源、图片、多平台版本和 `dashboard/data.json`。每个选中平台都必须先读取共用约束与其精确 profile，缺失 profile 时不得生成版本。workspace 不要求是 Git 仓库；当前目录明显不正确时必须在读写前停止并提示用户从内容 workspace 打开任务，而不是要求用户配置命令参数。文章配图按需编排 `image2-api-generator`、`guizang-ppt-skill` 和 `chrome:control-chrome`，最终稿必须完成轻量独立审核子智能体闭环；这些依赖不可用时必须按 Skill 规则降级或停止。它不是其他 Skill 的前置。`evidence-first-product-design` 是入口/编排 Skill，但不是其他 Skill 的强制前置；`layers-intro` 是其他 `layers-*` Skill 的真实前置。
+当前 `content-repurposing-pipeline` 是运行时中立的编排/执行 Skill。它把进程当前工作目录作为唯一内容 workspace，不接受 workspace 参数，不读取配置文件或环境变量，也不搜索父级和相邻目录；AI 必须把脚本工作目录设为内容 workspace 根目录。Skill 保存文章组织规则、模板、脚本、16 个按需加载的平台 profile 和只读看板代码，用户 workspace 只保存母稿、来源、图片、多平台版本和 `dashboard/data.json`。每个选中平台都必须先读取共用约束与其精确 profile，缺失 profile 时不得生成版本。workspace 不要求是 Git 仓库；当前目录明显不正确时必须在读写前停止并提示用户从内容 workspace 打开任务，而不是要求用户配置命令参数。用户只需调用 `content-repurposing-pipeline`；完整母稿在事实边界形成后由它内部路由一次 `edit-article-spine` 编辑，中文平台稿在适配后只做一次平台感知的 `targeted` 检查，不得叠加第二个全文改写 Skill。随后一个轻量独立审稿子智能体合并完成事实回归、盲读、证据、视觉和残留模板模式 QA；这些编辑活动不会增加状态、看板字段或人工审核节点。编辑 Skill 不可用时使用内置六维回退，只有仍存在具体质量问题才阻塞。文章配图按需编排 `image2-api-generator`、`guizang-ppt-skill` 和 `chrome:control-chrome`。`content-repurposing-pipeline` 不是其他 Skill 的前置。`edit-article-spine` 也可独立用于长文诊断和重建。`evidence-first-product-design` 是入口/编排 Skill，但不是其他 Skill 的强制前置；`layers-intro` 是其他 `layers-*` Skill 的真实前置。
 
 ## 版本维护策略
 

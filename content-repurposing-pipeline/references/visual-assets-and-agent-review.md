@@ -78,16 +78,18 @@ The fact that an image exists is not evidence that it belongs in the article.
 
 Use one independent review subagent by default. Do not tell it the intended verdict or the author's diagnosis.
 
-At master stage, provide the exact current master, source summary, selected visuals, audience, and ask it to check:
+At master stage, provide the exact current master, source summary, temporary semantic boundary, selected visuals, audience, and ask it to check:
 
-- usefulness and structure;
-- material claims and uncertainty;
+- whether it can state one arguable central claim and explain how each section advances it;
+- semantic regression against protected facts, material claims, and uncertainty;
+- repeated conclusions, misplaced caveats, clustered template patterns, generic transitions, and sections that can be freely reordered;
+- usefulness, reader friction, and whether the ending belongs to this article;
 - commands, versions, and links;
 - screenshot relevance and authenticity;
 - privacy, alt text, and publication rights.
 
 Apply justified fixes and rerun a fresh review until actionable findings are closed. Record only `passed`, `needs_changes`, or a concise blocker in `dashboard/data.json`.
 
-At platform stage, use a fresh reviewer for the platform body, local images, metadata, and destination fit. Add a second visual reviewer only when the asset set is genuinely complex.
+At platform stage, use a fresh reviewer for the platform body, local images, metadata, destination fit, protected-element fidelity, and residual clustered template patterns after any targeted Chinese edit. Add a second visual reviewer only when the asset set is genuinely complex.
 
 Subagents perform QA. They never approve the master, select platforms, approve publication, publish, commit, push, or change an external system.

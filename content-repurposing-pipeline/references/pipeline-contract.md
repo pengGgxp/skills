@@ -133,7 +133,11 @@ The revision is a personal workflow aid, not a cryptographic audit claim.
 
 ## Internal QA And Human Review
 
-Use one independent review subagent by default at the master stage and a fresh one at the platform stage. Add a separate visual review only when image authenticity, privacy, or rights require specialist attention.
+For a full master, first establish a temporary semantic boundary from the verified sources, then invoke `$edit-article-spine` before human review. Its editorial pass may rebuild structure and voice but may not change protected facts or create another workflow state. Do not store paragraph labels, pattern counts, or a separate editorial ledger in `dashboard/data.json`.
+
+For Chinese prose, use `humanization-routing.md` as the input and self-check contract for that same master edit. After a material Chinese platform adaptation, run one platform-aware `targeted` pass before the normal platform reviewer. These are existing editorial and QA activities, not additional stages, approval gates, or required JSON fields. Do not run a second overlapping full-text humanizer. If the editing Skill is unavailable, use the bounded fallback; missing machinery alone is not a blocker, but any concrete defect that remains must keep the affected item in its existing drafting state and use `qa.master` or `qa.platforms.<platform>` plus `blockers`.
+
+Use one independent review subagent by default at the master stage and a fresh one at the platform stage. The master reviewer combines semantic regression, blind-reader progression, evidence, and visual QA in one review. Add a separate visual review only when image authenticity, privacy, or rights require specialist attention.
 
 Review agents may recommend changes but may not create human decisions. Resolve actionable findings, rerun the reviewer, and store only the current `qa` result and concise blockers in JSON.
 
