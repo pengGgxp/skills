@@ -1,0 +1,4 @@
+interface:
+  display_name: "中文工作写作"
+  short_description: "按中文工作场景改写汇报和方案，检查标题、结构、句法及信息取舍"
+  default_prompt: "请用 $chinese-work-writing 修改这份中文材料，保留事实，删去无用说明，让标题、结构和句子符合受众的阅读习惯。"

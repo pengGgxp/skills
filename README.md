@@ -2,11 +2,11 @@
 
 这是我的个人 Agent Skills 仓库，用于集中保存、整理和维护日常使用的 Skill。仓库同时包含自建 Skill 和经来源、版本、许可证核验后收录的第三方 Skill。
 
-当前快照日期为 **2026-08-06**，共收录 **53 个用户级 Skill**：
+当前快照日期为 **2026-10-27**，共收录 **54 个用户级 Skill**：
 
 | 分组 | 数量 | 类型 | 来源 | 许可证 |
 | --- | ---: | --- | --- | --- |
-| 自建 Skill | 5 | 自建 | 本仓库与本机协作维护 | 尚未单独声明 |
+| 自建 Skill | 6 | 自建 | 本仓库与本机协作维护 | 尚未单独声明 |
 | Layers of Product Design | 9 | 收录 | [jamiemill/layers-skills](https://github.com/jamiemill/layers-skills/tree/a201dc8c2011940b9d93934abb0f40c3b226c7ca) | [MIT](./licenses/layers-skills-LICENSE.txt) |
 | Owl Designer Skills | 14 | 收录 | [Owl-Listener/designer-skills](https://github.com/Owl-Listener/designer-skills/tree/acc3e574b36ef2895268a176dbae886e1b845ae0) | [MIT](./licenses/designer-skills-LICENSE.txt) |
 | better-web-ui | 10 | 收录 | [aladicf/better-web-ui](https://github.com/aladicf/better-web-ui/tree/af21dcfa71d83104a9e0beb04ffedf79f800f53c) | [自定义许可证](./licenses/better-web-ui-LICENSE.txt) |
@@ -51,6 +51,7 @@ Codex 的 `.system`、插件缓存和 `vendor_imports` 不属于可移植的用�
 
 | Skill | 简介 | 角色 |
 | --- | --- | --- |
+| [`chinese-work-writing`](./chinese-work-writing/) | 起草、审阅和改写中文项目汇报、方案说明与工作总结，调整结构、标题、句法和信息取舍 | 方法/写作 |
 | [`content-repurposing-pipeline`](./content-repurposing-pipeline/) | 在当前内容 workspace 中完成选题、自然中文母稿、实机配图、16 个平台版本、独立 QA 和只读状态看板 | 编排/执行 |
 | [`edit-article-spine`](./edit-article-spine/) | 保护事实边界，同时重建长文观点脊柱、论证推进、限定条件与真实作者声音 | 方法/编辑 |
 | [`evidence-first-product-design`](./evidence-first-product-design/) | 从项目事实和上下文发现出发，按需编排产品策略、概念模型、交互、视觉实现与运行时 QA | 入口/编排 |
@@ -237,6 +238,7 @@ foreach ($link in $pipelineLinks) {
 - better-web-ui 不是标准 MIT，公开分发时必须同时公开完整对应源码，且不得作为闭源、专有或收费产品分发；
 - HyperFrames Skill 固定在最新稳定版 `v0.7.55` 的 Apache-2.0 提交；`hyperframes-animation`、`hyperframes-cli`、`hyperframes-creative` 和 `remotion-to-hyperframes` 修正了上游失效的路径、旧命名或命令示例，`media-use` 因音频再分发信息不足删除了上游 SFX 文件，五者标记为改编；
 - `guizang-ppt-skill` 保留在 MIT 提交 `6bfa520`：最新稳定 tag 比它更旧，最新 HEAD 只增加赞助信息并改为 AGPL-3.0，没有功能修复。其内置 `motion@11.11.17` 另按 [Motion MIT 许可证](./licenses/motion-11.11.17-LICENSE.md) 分发；
+- `chinese-work-writing` 是本机维护的中文工作写作 Skill，按 2026-10-27 的用户级安装版本原样收录，包含入口、改写示例与界面配置；未单独声明许可证；
 - `content-repurposing-pipeline` 最初由本机 Skill Workshop 创建，现由本仓库以运行时中立方式维护，可供 Codex、Claude Code、WorkBuddy、OpenClaw 等 Agent 使用；它没有第三方上游、tag、LICENSE 或 NOTICE；
 - `edit-article-spine` 是基于本机真实文章编辑问题协作创建的自建 Skill，没有第三方上游、tag、LICENSE 或 NOTICE；
 - `image2-api-generator` 是本机协作创建的自建 Skill，没有第三方上游、tag、LICENSE 或 NOTICE；源目录中已配置的 `.env` 未收录，安装后必须在本地单独配置；
